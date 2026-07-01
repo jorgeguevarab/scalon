@@ -606,13 +606,21 @@ function renderHoy(){
   }).join('');
 }
 
+// Any recorded effort counts toward the streak, not just hitting 100% of the
+// target — 5 of 10 minutes logged is still progress and should register as such.
 function setLogValue(id, value){
   const h = state.habits.find(x=>x.id===id);
   const t = todayStr();
-  if(!h.logs[t]) h.logs[t] = { done:false, value:0 };
-  h.logs[t].value = parseFloat(value)||0;
+  if(!h.logs[t]) h.logs[t] = { done:false, value:0, sessions:[] };
+  const v = parseFloat(value)||0;
+  h.logs[t].value = v;
+  h.logs[t].done = v > 0;
+  saveState();
+  const earned = checkBadges(h);
   saveState();
   renderHoy();
+  if(h.logs[t].done) markDoneRemote(h.id);
+  if(earned.length) celebrateBadges(h, earned);
 }
 function toggleDone(id){
   const h = state.habits.find(x=>x.id===id);
@@ -678,7 +686,7 @@ function stopTimer(id, note){
   log.value = round1(log.sessions.reduce((s,x)=>s+x.value, 0));
   log.elapsedSeconds = (log.elapsedSeconds||0) + elapsedSec;
   const rating = computeRating(log.value, h.currentTarget);
-  if(rating.pct>=100) log.done = true;
+  if(log.value>0) log.done = true;
   saveState();
   const earned = checkBadges(h);
   saveState();
@@ -802,7 +810,7 @@ function renderDetail(){
     <div class="stat-row" style="--hc:${h.color}">
       <div class="stat-box"><div class="n">${streak}</div><div class="l">Racha actual</div></div>
       <div class="stat-box"><div class="n">${h.bestStreak||0}</div><div class="l">Mejor racha</div></div>
-      <div class="stat-box"><div class="n">${totalDone}</div><div class="l">Días cumplidos</div></div>
+      <div class="stat-box"><div class="n">${totalDone}</div><div class="l">Días con progreso</div></div>
     </div>
 
     <div class="section-label">Premios por constancia</div>
