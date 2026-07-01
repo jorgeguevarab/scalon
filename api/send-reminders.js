@@ -22,7 +22,8 @@ function dateKeyInTz(date, timeZone) {
   return new Intl.DateTimeFormat('en-CA', { timeZone }).format(date); // YYYY-MM-DD
 }
 
-// Called every ~5 min by the GitHub Actions cron workflow (see .github/workflows/reminders.yml).
+// Called every ~5 min by an external cron (cron-job.org — see README). GitHub Actions'
+// `schedule` trigger was tried first but is best-effort and skipped windows >10 min.
 // Reminder delivery is therefore accurate to a ~5-10 minute window, not to the exact minute.
 module.exports = async (req, res) => {
   if (!process.env.CRON_SECRET || req.headers['authorization'] !== `Bearer ${process.env.CRON_SECRET}`) {

@@ -32,13 +32,23 @@ iOS solo entrega notificaciones push a apps **instaladas en la pantalla de inici
 
 Por eso el envío es real Web Push con un componente de servidor mínimo:
 
-1. Al activar notificaciones en **Ajustes**, el navegador se suscribe a push (`PushManager`) y esa suscripción, junto con el nombre/hora de cada hábito con recordatorio, se guarda en Vercel KV vía `POST /api/subscribe`.
-2. Un workflow de GitHub Actions ([`.github/workflows/reminders.yml`](.github/workflows/reminders.yml)) llama a `GET /api/send-reminders` cada 5 minutos.
+1. Al activar notificaciones en **Ajustes**, el navegador se suscribe a push (`PushManager`) y esa suscripción, junto con el nombre/hora de cada hábito con recordatorio, se guarda en Redis vía `POST /api/subscribe`.
+2. Un cron externo (ver [cron-job.org](https://cron-job.org), configuración abajo) llama a `GET /api/send-reminders` cada 5 minutos. **No usamos GitHub Actions para esto**: sus `schedule` triggers son "best effort" y en la práctica se saltaban ventanas de más de 10 minutos en este repo — un problema real de puntualidad, no del código.
 3. Esa función revisa qué recordatorios caen en la ventana de los últimos ~5 minutos (en la zona horaria del dispositivo) y aún no se enviaron hoy, y despacha el push con [`web-push`](https://github.com/web-push-libs/web-push) usando llaves VAPID.
 4. El `sw.js` instalado en el teléfono recibe el evento `push` y muestra la notificación con `registration.showNotification`, incluso con la app cerrada.
 5. Si marcas el hábito como cumplido desde la app, se avisa al servidor (`POST /api/mark-done`) para no mandarte un recordatorio de algo que ya hiciste.
 
-**Importante**: por el intervalo del cron (5 min) y la naturaleza de GitHub Actions, el aviso llega en una ventana de ~5–10 minutos alrededor de la hora configurada, no al minuto exacto. Solo el nombre del hábito y su horario viajan al servidor — el resto del estado (valores registrados, rachas, calendario) permanece únicamente en el teléfono.
+**Importante**: por el intervalo del cron (5 min), el aviso llega en una ventana de ~1–6 minutos después de la hora configurada, no al minuto exacto. Solo el nombre del hábito y su horario viajan al servidor — el resto del estado (valores registrados, rachas, calendario) permanece únicamente en el teléfono.
+
+### Configurar el cron en cron-job.org
+
+1. Crea una cuenta gratuita en [cron-job.org](https://console.cron-job.org).
+2. Nuevo cronjob:
+   - **URL**: `https://scalon-nine.vercel.app/api/send-reminders`
+   - **Método**: GET
+   - **Horario**: cada 5 minutos
+   - **Headers** (pestaña Advanced): `Authorization: Bearer <CRON_SECRET>` — el mismo valor que pusiste como `CRON_SECRET` en Vercel.
+3. Guarda y actívalo. Puedes revisar en la pestaña "History" de cron-job.org si cada ejecución responde `200` con `{"ok":true,...}`.
 
 ## Cuenta y sincronización entre dispositivos
 
@@ -60,9 +70,7 @@ Notificaciones push y cuentas de usuario comparten el mismo almacén Redis.
    - `VAPID_PRIVATE_KEY`
    - `VAPID_SUBJECT` (por ejemplo `mailto:tu@correo.com`)
 3. **`CRON_SECRET`** (para push): genera un valor aleatorio (`openssl rand -hex 32`) y agrégalo como variable de entorno en Vercel.
-4. **GitHub Actions** (para push): en el repo, ve a Settings → Secrets and variables → Actions y crea:
-   - `APP_URL` — la URL desplegada (ej. `https://escalon.vercel.app`, sin `/` final)
-   - `CRON_SECRET` — el mismo valor del paso 3
+4. **cron-job.org** (para push): configura el cronjob descrito arriba en "Configurar el cron en cron-job.org", usando el mismo `CRON_SECRET` del paso 3.
 5. Redepliega. Las cuentas funcionan en cuanto Redis está conectado (paso 1); las notificaciones necesitan además los pasos 2–4.
 
 Si no configuras nada de esto, la app sigue funcionando con normalidad en modo local — solo los botones de notificaciones y de cuenta no lograrán completar la llamada al servidor.
