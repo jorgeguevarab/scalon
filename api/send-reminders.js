@@ -28,11 +28,6 @@ function dateKeyInTz(date, timeZone) {
 module.exports = async (req, res) => {
   const authHeader = (req.headers['authorization'] || '').trim();
   const expected = `Bearer ${(process.env.CRON_SECRET || '').trim()}`;
-  console.log('send-reminders auth check', {
-    headerLen: authHeader.length,
-    expectedLen: expected.length,
-    startsWithBearer: authHeader.startsWith('Bearer '),
-  });
   if (!process.env.CRON_SECRET || authHeader !== expected) {
     res.status(401).json({ error: 'unauthorized' });
     return;
