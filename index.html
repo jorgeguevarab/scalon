@@ -8,7 +8,9 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Escalón">
-<meta name="theme-color" content="#1E2A38">
+<meta name="theme-color" content="#1E2A38" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#1E2A38" media="(prefers-color-scheme: light)">
+<link rel="manifest" href="/manifest.json">
 <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' fill='%231E2A38'/%3E%3Crect x='24' y='120' width='34' height='36' fill='%23E2933C'/%3E%3Crect x='66' y='96' width='34' height='60' fill='%23E2933C'/%3E%3Crect x='108' y='68' width='34' height='88' fill='%23E2933C'/%3E%3C/svg%3E">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' fill='%231E2A38'/%3E%3Crect x='24' y='120' width='34' height='36' fill='%23E2933C'/%3E%3Crect x='66' y='96' width='34' height='60' fill='%23E2933C'/%3E%3Crect x='108' y='68' width='34' height='88' fill='%23E2933C'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -16,6 +18,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,900&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root{
+    color-scheme: light dark;
     --paper:#F7F4EC;
     --paper-alt:#EFEAE0;
     --ink-900:#16212C;
@@ -27,22 +30,48 @@
     --moss-dim:#CBDCCF;
     --rule:#DAD4C4;
     --danger:#B5533F;
+    --bar:#16212C;
+    --bar-text:#F7F4EC;
+    --bar-text-dim:#9FB0BE;
+    --input-bg:#FFFFFF;
+    --excellent-bg:var(--moss-dim); --excellent-text:#2C4A34;
+    --good-bg:var(--amber-dim); --good-text:#6B4416;
+    --partial-bg:#EADFC2; --partial-text:#6B5A20;
+    --low-bg:#EBD3CC; --low-text:#7A3A2B;
     --radius:14px;
     --safe-top:env(safe-area-inset-top);
     --safe-bottom:env(safe-area-inset-bottom);
   }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --paper:#15181D;
+      --paper-alt:#1E2229;
+      --ink-900:#F2EFE7;
+      --ink-700:#C7C2B4;
+      --ink-500:#8B9199;
+      --amber-dim:#4A3620;
+      --moss-dim:#24362A;
+      --rule:#2A2F36;
+      --danger:#D97860;
+      --input-bg:#232830;
+      --excellent-bg:#24362A; --excellent-text:#8FCB9F;
+      --good-bg:#4A3620; --good-text:#F0C896;
+      --partial-bg:#3A331A; --partial-text:#E0CE8C;
+      --low-bg:#3A2420; --low-text:#E3A996;
+    }
+  }
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
-  html,body{margin:0; padding:0; background:var(--ink-900); overscroll-behavior-y:none;}
-  body{ font-family:'Inter',system-ui,sans-serif; color:var(--ink-900); -webkit-font-smoothing:antialiased; min-height:100vh; }
+  html,body{margin:0; padding:0; background:var(--bar); overscroll-behavior-y:none;}
+  body{ font-family:'Inter',-apple-system,BlinkMacSystemFont,system-ui,sans-serif; color:var(--ink-900); -webkit-font-smoothing:antialiased; min-height:100vh; }
   .mono{font-family:'IBM Plex Mono',monospace;}
   .display{font-family:'Fraunces',serif;}
 
   #app{ max-width:520px; margin:0 auto; background:var(--paper); min-height:100vh; display:flex; flex-direction:column; position:relative; }
 
-  header.top{ padding:calc(var(--safe-top) + 18px) 20px 14px; background:var(--ink-900); color:var(--paper); position:sticky; top:0; z-index:10; }
+  header.top{ padding:calc(var(--safe-top) + 18px) 20px 14px; background:var(--bar); color:var(--bar-text); position:sticky; top:0; z-index:10; }
   header.top .wordmark{ font-family:'Fraunces',serif; font-weight:900; font-size:22px; letter-spacing:-0.01em; display:flex; align-items:baseline; gap:8px; }
   header.top .wordmark .dot{color:var(--amber);}
-  header.top .sub{ font-size:12.5px; color:#9FB0BE; margin-top:3px; font-family:'IBM Plex Mono',monospace; text-transform:lowercase; }
+  header.top .sub{ font-size:12.5px; color:var(--bar-text-dim); margin-top:3px; font-family:'IBM Plex Mono',monospace; text-transform:lowercase; }
 
   main{flex:1; padding:18px 18px calc(90px + var(--safe-bottom));}
   .view{display:none;}
@@ -60,7 +89,7 @@
   .hc-icon{ width:34px; height:34px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:17px; background:var(--hc,var(--amber)); flex-shrink:0; }
   .hc-name{font-family:'Fraunces',serif; font-weight:600; font-size:16.5px; line-height:1.25;}
   .hc-week{font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--ink-500); margin-top:3px; display:flex; align-items:center; gap:6px;}
-  .streak-chip{ display:inline-flex; align-items:center; gap:3px; background:var(--ink-900); color:var(--paper); border-radius:20px; padding:1px 8px 1px 6px; font-size:10.5px; }
+  .streak-chip{ display:inline-flex; align-items:center; gap:3px; background:var(--bar); color:var(--bar-text); border-radius:20px; padding:1px 8px 1px 6px; font-size:10.5px; }
   .hc-target{ font-family:'IBM Plex Mono',monospace; font-size:19px; font-weight:600; color:var(--ink-900); white-space:nowrap; text-align:right; }
   .hc-target span{font-size:12px; color:var(--ink-500); font-weight:400; display:block;}
 
@@ -70,6 +99,7 @@
   .hc-input span{font-size:12px; color:var(--ink-500);}
   .check-btn{ width:40px; height:40px; border-radius:10px; border:1px solid var(--rule); background:var(--paper); font-size:18px; display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0; transition:.15s; }
   .check-btn.on{background:var(--hc,var(--moss)); border-color:var(--hc,var(--moss)); color:#fff;}
+  .check-btn:active, .timer-btn:active{transform:scale(.92);}
 
   .timer-row{ display:flex; align-items:center; gap:10px; margin-top:10px; padding-top:10px; border-top:1px dashed var(--rule); }
   .timer-display{ font-family:'IBM Plex Mono',monospace; font-size:22px; font-weight:600; color:var(--ink-900); flex:1; }
@@ -79,10 +109,10 @@
   .timer-btn.stop{background:var(--ink-900); color:var(--paper);}
 
   .rating-badge{ margin-top:10px; padding:8px 12px; border-radius:10px; font-size:12px; display:flex; justify-content:space-between; align-items:center; }
-  .rating-badge.excellent{background:var(--moss-dim); color:#2C4A34;}
-  .rating-badge.good{background:var(--amber-dim); color:#6B4416;}
-  .rating-badge.partial{background:#EADFC2; color:#6B5A20;}
-  .rating-badge.low{background:#EBD3CC; color:#7A3A2B;}
+  .rating-badge.excellent{background:var(--excellent-bg); color:var(--excellent-text);}
+  .rating-badge.good{background:var(--good-bg); color:var(--good-text);}
+  .rating-badge.partial{background:var(--partial-bg); color:var(--partial-text);}
+  .rating-badge.low{background:var(--low-bg); color:var(--low-text);}
 
   .bump-badge{ margin-top:10px; padding:9px 12px; border-radius:10px; background:var(--ink-900); color:var(--paper); font-size:12.5px; display:flex; justify-content:space-between; align-items:center; gap:10px; }
   .bump-badge button{ background:var(--amber); color:var(--ink-900); border:none; border-radius:8px; padding:6px 10px; font-size:12px; font-weight:600; font-family:'IBM Plex Mono',monospace; cursor:pointer; white-space:nowrap; }
@@ -91,19 +121,24 @@
   .empty-state .display{ font-size:19px; color:var(--ink-900); margin-bottom:6px; }
   .empty-state p{font-size:13.5px; line-height:1.5; margin:0 0 18px;}
 
-  .habit-row{ display:flex; justify-content:space-between; align-items:center; padding:14px 4px; border-bottom:1px solid var(--rule); cursor:pointer; gap:10px; }
+  .habit-row{ display:flex; justify-content:space-between; align-items:center; padding:14px 4px; border-bottom:1px solid var(--rule); cursor:pointer; gap:10px; transition:opacity .1s ease; }
+  .habit-row:active{opacity:.55;}
   .habit-row:last-child{border-bottom:none;}
   .habit-row .name{font-family:'Fraunces',serif; font-weight:600; font-size:16px;}
   .habit-row .meta{font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--ink-500); margin-top:2px;}
   .habit-row .arrow{color:var(--ink-500); font-size:18px;}
 
-  .fab{ position:fixed; bottom:calc(86px + var(--safe-bottom)); right:calc(50% - 260px + 18px); width:54px; height:54px; border-radius:50%; background:var(--amber); color:var(--ink-900); font-size:26px; border:none; box-shadow:0 6px 16px rgba(0,0,0,.25); display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:20; }
+  .fab{ position:fixed; bottom:calc(86px + var(--safe-bottom)); right:calc(50% - 260px + 18px); width:54px; height:54px; border-radius:50%; background:var(--amber); color:var(--ink-900); font-size:26px; border:none; box-shadow:0 6px 16px rgba(0,0,0,.25); display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:20; transition:transform .1s ease; }
+  .fab:active{transform:scale(.9);}
   @media (max-width:600px){ .fab{ right:20px; } }
 
-  nav.bottom{ position:fixed; bottom:0; left:0; right:0; max-width:520px; margin:0 auto; background:var(--ink-900); display:flex; padding:10px 8px calc(10px + var(--safe-bottom)); border-top:1px solid rgba(255,255,255,.08); z-index:15; }
-  nav.bottom button{ flex:1; background:none; border:none; color:#8091A0; display:flex; flex-direction:column; align-items:center; gap:4px; font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.03em; padding:6px 0; cursor:pointer; text-transform:uppercase; }
+  nav.bottom{ position:fixed; bottom:0; left:0; right:0; max-width:520px; margin:0 auto; background:var(--bar); display:flex; padding:10px 8px calc(10px + var(--safe-bottom)); border-top:1px solid rgba(255,255,255,.08); z-index:15; }
+  nav.bottom button{ flex:1; background:none; border:none; color:var(--bar-text-dim); display:flex; flex-direction:column; align-items:center; gap:4px; font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.03em; padding:6px 0; cursor:pointer; text-transform:uppercase; transition:transform .1s ease; }
   nav.bottom button.active{color:var(--amber);}
-  nav.bottom button .ic{font-size:19px;}
+  nav.bottom button:active{transform:scale(.9);}
+  nav.bottom button .ic{font-size:19px; line-height:1; display:flex;}
+  nav.bottom button .ic svg{width:22px; height:22px; fill:none; stroke:currentColor; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round;}
+  nav.bottom button.active .ic svg{fill:currentColor; fill-opacity:.14;}
 
   .back-row{display:flex; align-items:center; gap:10px; margin-bottom:4px; cursor:pointer;}
   .back-row .chev{font-size:20px; color:var(--ink-500);}
@@ -144,17 +179,19 @@
   .cal-cell.future{opacity:.35;}
 
   .detail-actions{display:flex; gap:10px; margin-top:28px;}
-  .btn{ flex:1; padding:12px; border-radius:10px; text-align:center; font-size:13.5px; font-weight:600; cursor:pointer; border:1px solid var(--rule); background:var(--paper); }
+  .btn{ flex:1; padding:12px; border-radius:10px; text-align:center; font-size:13.5px; font-weight:600; cursor:pointer; border:1px solid var(--rule); background:var(--paper); transition:transform .1s ease, opacity .1s ease; }
+  .btn:active{transform:scale(.97); opacity:.85;}
   .btn.danger{color:var(--danger); border-color:#E3C3BB;}
   .btn.primary{background:var(--ink-900); color:var(--paper); border-color:var(--ink-900);}
 
-  .modal-overlay{ position:fixed; inset:0; background:rgba(22,33,44,.55); z-index:50; display:none; align-items:flex-end; justify-content:center; }
+  .modal-overlay{ position:fixed; inset:0; background:rgba(10,14,18,.55); z-index:50; display:none; align-items:flex-end; justify-content:center; }
   .modal-overlay.show{display:flex;}
-  .modal{ background:var(--paper); width:100%; max-width:520px; border-radius:20px 20px 0 0; padding:22px 20px calc(26px + var(--safe-bottom)); max-height:88vh; overflow-y:auto; }
+  .modal{ background:var(--paper); width:100%; max-width:520px; border-radius:20px 20px 0 0; padding:10px 20px calc(26px + var(--safe-bottom)); max-height:88vh; overflow-y:auto; }
+  .modal .grabber{ width:36px; height:5px; border-radius:3px; background:var(--rule); margin:0 auto 16px; }
   .modal h2{font-family:'Fraunces',serif; font-size:21px; margin:0 0 18px;}
   .field{margin-bottom:16px;}
   .field label{display:block; font-family:'IBM Plex Mono',monospace; font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-500); margin-bottom:6px;}
-  .field input, .field select{ width:100%; padding:11px 12px; border:1px solid var(--rule); border-radius:10px; background:#fff; font-size:15px; font-family:'Inter',sans-serif; color:var(--ink-900); }
+  .field input, .field select{ width:100%; padding:11px 12px; border:1px solid var(--rule); border-radius:10px; background:var(--input-bg); font-size:15px; font-family:'Inter',sans-serif; color:var(--ink-900); }
   .row2{display:flex; gap:12px;}
   .row2 .field{flex:1;}
   .toggle-row{display:flex; justify-content:space-between; align-items:center; padding:10px 2px;}
@@ -176,9 +213,11 @@
   .settings-card{ background:var(--paper-alt); border:1px solid var(--rule); border-radius:var(--radius); padding:16px; margin-bottom:14px; }
   .settings-card h3{font-family:'Fraunces',serif; font-size:15.5px; margin:0 0 6px;}
   .settings-card p{font-size:13px; color:var(--ink-500); line-height:1.5; margin:0 0 12px;}
-  .settings-card button{ width:100%; padding:11px; border-radius:9px; border:none; background:var(--ink-900); color:var(--paper); font-size:13.5px; font-weight:600; cursor:pointer; }
+  .settings-card button{ width:100%; padding:11px; border-radius:9px; border:none; background:var(--ink-900); color:var(--paper); font-size:13.5px; font-weight:600; cursor:pointer; transition:transform .1s ease, opacity .1s ease; }
+  .settings-card button:active{transform:scale(.98); opacity:.85;}
+  .settings-card button:disabled{opacity:.5; cursor:default;}
   .note{ font-size:12px; color:var(--ink-500); line-height:1.6; padding:14px; background:var(--paper-alt); border-left:3px solid var(--amber); border-radius:6px; margin-bottom:16px; }
-  #toast{ position:fixed; bottom:calc(96px + var(--safe-bottom)); left:50%; transform:translateX(-50%); background:var(--ink-900); color:var(--paper); padding:10px 18px; border-radius:20px; font-size:13px; opacity:0; transition:opacity .25s; z-index:60; pointer-events:none; max-width:80%; text-align:center; }
+  #toast{ position:fixed; bottom:calc(96px + var(--safe-bottom)); left:50%; transform:translateX(-50%); background:var(--bar); color:var(--bar-text); padding:10px 18px; border-radius:20px; font-size:13px; opacity:0; transition:opacity .25s; z-index:60; pointer-events:none; max-width:80%; text-align:center; }
   #toast.show{opacity:1;}
 </style>
 </head>
@@ -210,8 +249,8 @@
       <div class="section-label">Ajustes</div>
       <div class="settings-card">
         <h3>Recordatorios</h3>
-        <p>Los avisos solo llegan mientras Escalón sigue abierto o recién usado en tu iPhone — iOS no permite notificaciones programadas desde una app instalada sin un servidor propio. Abrir la app un momento al día asegura que el aviso salga.</p>
-        <button onclick="requestNotifPermission()" id="notifBtn">Activar notificaciones</button>
+        <p>Con las notificaciones activadas, Escalón te avisa a la hora que configures en cada hábito aunque la app esté cerrada. Para que funcione en iPhone: agrega Escalón a tu pantalla de inicio (compartir → Añadir a pantalla de inicio) y actívalas desde ahí — Safari no entrega notificaciones push a pestañas normales. Solo se envía al servidor lo necesario para avisarte: el nombre del hábito y la hora del recordatorio; tus registros, rachas y calendario nunca salen del teléfono.</p>
+        <button onclick="toggleNotifications()" id="notifBtn">Activar notificaciones</button>
       </div>
       <div class="settings-card">
         <h3>Respaldo de datos</h3>
@@ -224,21 +263,22 @@
         <input type="file" id="importFile" accept="application/json" style="margin-bottom:10px; font-size:12px;">
         <button onclick="importData()">Restaurar</button>
       </div>
-      <div class="note">Escalón funciona sin conexión una vez cargado y no envía tus datos a ningún servidor. Todo vive en tu teléfono.</div>
+      <div class="note">Tus registros, rachas, medallas y calendario viven solo en este teléfono y nunca salen de él. Si activas notificaciones, el nombre y horario de tus hábitos se guardan en un servidor únicamente para poder avisarte.</div>
     </section>
   </main>
 
   <button class="fab" id="fabAdd" onclick="openHabitForm()">+</button>
 
   <nav class="bottom">
-    <button class="active" data-view="hoy" onclick="goTo('hoy')"><span class="ic">◐</span>Hoy</button>
-    <button data-view="habitos" onclick="goTo('habitos')"><span class="ic">▦</span>Hábitos</button>
-    <button data-view="ajustes" onclick="goTo('ajustes')"><span class="ic">⚙</span>Ajustes</button>
+    <button class="active" data-view="hoy" onclick="goTo('hoy')"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18z"/></svg></span>Hoy</button>
+    <button data-view="habitos" onclick="goTo('habitos')"><span class="ic"><svg viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></svg></span>Hábitos</button>
+    <button data-view="ajustes" onclick="goTo('ajustes')"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>Ajustes</button>
   </nav>
 </div>
 
 <div class="modal-overlay" id="habitModalOverlay">
   <div class="modal">
+    <div class="grabber"></div>
     <h2 id="modalTitle">Nuevo hábito</h2>
     <div class="field">
       <label>Nombre del hábito</label>
@@ -473,6 +513,7 @@ function toggleDone(id){
   const earned = checkBadges(h);
   saveState();
   renderHoy();
+  if(h.logs[t].done) markDoneRemote(h.id);
   if(earned.length) celebrateBadges(h, earned);
 }
 function confirmBump(id){
@@ -486,6 +527,7 @@ function confirmBump(id){
   saveState();
   renderHoy();
   showToast('Objetivo actualizado a '+h.currentTarget+' '+h.unit);
+  syncPush();
 }
 
 /* ---------------- Timer ---------------- */
@@ -516,6 +558,7 @@ function stopTimer(id){
   saveState();
   renderHoy();
   showToast(`Sesión: ${formatMMSS(elapsedSec)} · ${rating.label} (${rating.pct}%)`);
+  if(h.logs[t].done) markDoneRemote(h.id);
   if(earned.length) celebrateBadges(h, earned);
 }
 function updateRunningTimers(){
@@ -708,7 +751,6 @@ function saveHabitForm(){
       appliedWeekIndex: 0,
       weekHistory: [{week:0, value:start}],
       logs: {},
-      lastNotifiedDate: null,
       timerStart: null,
       bestStreak: 0,
       badges: []
@@ -718,25 +760,106 @@ function saveHabitForm(){
   closeHabitForm();
   renderHabitos();
   showToast('Hábito guardado');
+  syncPush();
 }
 function deleteHabit(id){
   if(!confirm('¿Eliminar este hábito y todo su historial?')) return;
   state.habits = state.habits.filter(x=>x.id!==id);
   saveState();
   goTo('habitos');
+  syncPush();
 }
 
-/* ---------------- Ajustes ---------------- */
-function renderAjustes(){
-  const btn = document.getElementById('notifBtn');
-  if('Notification' in window && Notification.permission === 'granted') btn.textContent = 'Notificaciones activadas ✓';
+/* ---------------- Ajustes / Push notifications ---------------- */
+function urlBase64ToUint8Array(base64String){
+  const padding = '='.repeat((4 - base64String.length % 4) % 4);
+  const base64 = (base64String + padding).replace(/-/g,'+').replace(/_/g,'/');
+  const raw = atob(base64);
+  return Uint8Array.from([...raw].map(c=>c.charCodeAt(0)));
 }
-function requestNotifPermission(){
-  if(!('Notification' in window)){ showToast('Este navegador no soporta notificaciones'); return; }
-  Notification.requestPermission().then(p=>{
-    showToast(p==='granted' ? 'Notificaciones activadas' : 'Permiso no concedido');
+function buildReminders(){
+  return state.habits.filter(h=>h.reminderTime).map(h=>({
+    habitId: h.id, name: h.name, unit: h.unit, target: h.currentTarget,
+    icon: h.icon, time: h.reminderTime
+  }));
+}
+async function registerSW(){
+  if(!('serviceWorker' in navigator)) return null;
+  try{ return await navigator.serviceWorker.register('/sw.js'); }
+  catch(e){ return null; }
+}
+async function getPushSubscription(){
+  if(!('serviceWorker' in navigator) || !('PushManager' in window)) return null;
+  const reg = await navigator.serviceWorker.ready;
+  return reg.pushManager.getSubscription();
+}
+async function syncPush(){
+  const sub = await getPushSubscription();
+  if(!sub) return;
+  try{
+    await fetch('/api/subscribe', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        subscription: sub.toJSON(),
+        reminders: buildReminders(),
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+      })
+    });
+  }catch(e){}
+}
+async function markDoneRemote(habitId){
+  const sub = await getPushSubscription();
+  if(!sub) return;
+  try{
+    await fetch('/api/mark-done', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ endpoint: sub.endpoint, habitId, date: todayStr() })
+    });
+  }catch(e){}
+}
+async function toggleNotifications(){
+  const existing = await getPushSubscription();
+  if(existing){
+    try{ await fetch('/api/unsubscribe', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ endpoint: existing.endpoint }) }); }catch(e){}
+    await existing.unsubscribe();
+    showToast('Notificaciones desactivadas');
     renderAjustes();
-  });
+    return;
+  }
+  if(!('Notification' in window) || !('serviceWorker' in navigator) || !('PushManager' in window)){
+    showToast('Este navegador no soporta notificaciones push. En iPhone, agrega Escalón a tu pantalla de inicio primero.');
+    return;
+  }
+  const perm = await Notification.requestPermission();
+  if(perm !== 'granted'){ showToast('Permiso no concedido'); return; }
+  try{
+    const reg = await registerSW();
+    if(!reg) throw new Error('sin service worker');
+    const keyRes = await fetch('/api/vapid-public-key');
+    const { publicKey } = await keyRes.json();
+    if(!publicKey) throw new Error('sin llave VAPID');
+    const sub = await reg.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: urlBase64ToUint8Array(publicKey)
+    });
+    await fetch('/api/subscribe', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        subscription: sub.toJSON(),
+        reminders: buildReminders(),
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+      })
+    });
+    showToast('Notificaciones activadas');
+  }catch(e){
+    showToast('No se pudo activar. Revisa que Escalón esté en tu pantalla de inicio.');
+  }
+  renderAjustes();
+}
+async function renderAjustes(){
+  const btn = document.getElementById('notifBtn');
+  const sub = await getPushSubscription();
+  btn.textContent = sub ? 'Notificaciones activadas ✓ (toca para desactivar)' : 'Activar notificaciones';
 }
 function exportData(){
   const blob = new Blob([JSON.stringify(state,null,2)], {type:'application/json'});
@@ -763,25 +886,11 @@ function importData(){
   reader.readAsText(file);
 }
 
-/* ---------------- Reminders (best-effort, foreground only) ---------------- */
-function checkReminders(){
-  if(!('Notification' in window) || Notification.permission !== 'granted') return;
-  const now = new Date();
-  const hhmm = String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
-  const t = todayStr();
-  state.habits.forEach(h=>{
-    if(!h.reminderTime) return;
-    const log = h.logs[t];
-    if(log && log.done) return;
-    if(h.reminderTime === hhmm && h.lastNotifiedDate !== t){
-      new Notification('Escalón', { body: `${h.icon} Toca para registrar: ${h.name} (${h.currentTarget} ${h.unit})` });
-      h.lastNotifiedDate = t;
-      saveState();
-    }
-  });
-}
-setInterval(checkReminders, 30000);
-document.addEventListener('visibilitychange', ()=>{ if(!document.hidden){ reconcileAll(); checkReminders(); refreshCurrentView(); }});
+/* ---------------- Reminders ----------------
+   Delivery happens server-side via Web Push (see api/send-reminders.js),
+   triggered on a schedule by .github/workflows/reminders.yml. The page just
+   keeps the server's copy of each habit's reminder time in sync (syncPush). */
+document.addEventListener('visibilitychange', ()=>{ if(!document.hidden){ reconcileAll(); refreshCurrentView(); syncPush(); }});
 
 /* ---------------- Helpers ---------------- */
 function esc(s){ const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
@@ -805,6 +914,10 @@ setDateLine();
 reconcileAll();
 renderHoy();
 document.getElementById('fabAdd').style.display = 'none';
+registerSW();
+if('storage' in navigator && 'persist' in navigator.storage){
+  navigator.storage.persist().catch(()=>{});
+}
 </script>
 </body>
 </html>

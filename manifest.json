@@ -1,0 +1,26 @@
+{
+  "name": "Escalón — hábitos incrementales",
+  "short_name": "Escalón",
+  "description": "Sube tus hábitos un escalón por semana. Temporizador, rachas, medallas y calendario, todo guardado en tu teléfono.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#1E2A38",
+  "theme_color": "#1E2A38",
+  "lang": "es",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' fill='%231E2A38'/%3E%3Crect x='24' y='120' width='34' height='36' fill='%23E2933C'/%3E%3Crect x='66' y='96' width='34' height='60' fill='%23E2933C'/%3E%3Crect x='108' y='68' width='34' height='88' fill='%23E2933C'/%3E%3C/svg%3E",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' fill='%231E2A38'/%3E%3Crect x='36' y='114' width='28' height='30' fill='%23E2933C'/%3E%3Crect x='73' y='94' width='28' height='50' fill='%23E2933C'/%3E%3Crect x='110' y='70' width='28' height='74' fill='%23E2933C'/%3E%3C/svg%3E",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}
