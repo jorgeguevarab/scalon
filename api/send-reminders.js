@@ -26,7 +26,14 @@ function dateKeyInTz(date, timeZone) {
 // `schedule` trigger was tried first but is best-effort and skipped windows >10 min.
 // Reminder delivery is therefore accurate to a ~5-10 minute window, not to the exact minute.
 module.exports = async (req, res) => {
-  if (!process.env.CRON_SECRET || req.headers['authorization'] !== `Bearer ${process.env.CRON_SECRET}`) {
+  const authHeader = (req.headers['authorization'] || '').trim();
+  const expected = `Bearer ${(process.env.CRON_SECRET || '').trim()}`;
+  console.log('send-reminders auth check', {
+    headerLen: authHeader.length,
+    expectedLen: expected.length,
+    startsWithBearer: authHeader.startsWith('Bearer '),
+  });
+  if (!process.env.CRON_SECRET || authHeader !== expected) {
     res.status(401).json({ error: 'unauthorized' });
     return;
   }
