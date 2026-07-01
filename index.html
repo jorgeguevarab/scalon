@@ -216,9 +216,30 @@
   .settings-card button{ width:100%; padding:11px; border-radius:9px; border:none; background:var(--ink-900); color:var(--paper); font-size:13.5px; font-weight:600; cursor:pointer; transition:transform .1s ease, opacity .1s ease; }
   .settings-card button:active{transform:scale(.98); opacity:.85;}
   .settings-card button:disabled{opacity:.5; cursor:default;}
+  .settings-card button.secondary{background:transparent; color:var(--danger); border:1px solid #E3C3BB;}
   .note{ font-size:12px; color:var(--ink-500); line-height:1.6; padding:14px; background:var(--paper-alt); border-left:3px solid var(--amber); border-radius:6px; margin-bottom:16px; }
   #toast{ position:fixed; bottom:calc(96px + var(--safe-bottom)); left:50%; transform:translateX(-50%); background:var(--bar); color:var(--bar-text); padding:10px 18px; border-radius:20px; font-size:13px; opacity:0; transition:opacity .25s; z-index:60; pointer-events:none; max-width:80%; text-align:center; }
   #toast.show{opacity:1;}
+
+  .hc-input.readonly{opacity:.9;}
+  .hc-today-val{font-family:'IBM Plex Mono',monospace; font-size:15px; font-weight:600; color:var(--ink-900);}
+
+  .focus-overlay{ position:fixed; inset:0; z-index:70; display:none; flex-direction:column; align-items:center; justify-content:center; gap:12px; padding:32px 28px calc(32px + var(--safe-bottom)); background:linear-gradient(180deg, color-mix(in srgb, var(--hc,var(--amber)) 32%, var(--bar)), var(--bar) 65%); color:var(--bar-text); text-align:center; }
+  .focus-overlay.show{display:flex;}
+  .focus-minimize{ position:absolute; top:calc(var(--safe-top) + 16px); right:20px; background:rgba(255,255,255,.14); border:none; color:var(--bar-text); width:36px; height:36px; border-radius:50%; font-size:16px; cursor:pointer; }
+  .focus-icon{font-size:42px;}
+  .focus-name{font-family:'Fraunces',serif; font-weight:700; font-size:21px;}
+  .focus-timer{font-family:'IBM Plex Mono',monospace; font-size:52px; font-weight:600; letter-spacing:-.01em; margin:4px 0;}
+  .focus-meta{font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--bar-text-dim); margin-bottom:6px; line-height:1.5;}
+  .focus-note{ width:100%; max-width:360px; min-height:84px; border-radius:12px; border:1px solid rgba(255,255,255,.2); background:rgba(255,255,255,.08); color:var(--bar-text); padding:12px; font-family:'Inter',sans-serif; font-size:14px; resize:none; }
+  .focus-note::placeholder{color:var(--bar-text-dim);}
+  .focus-stop{ max-width:360px; width:100%; background:var(--bar-text); color:var(--bar); border:none; padding:14px; border-radius:10px; font-size:13.5px; font-weight:600; cursor:pointer; transition:transform .1s ease; }
+  .focus-stop:active{transform:scale(.97);}
+
+  .diary-list{display:flex; flex-direction:column; gap:10px; margin-bottom:6px;}
+  .diary-entry{ background:var(--paper-alt); border:1px solid var(--rule); border-radius:10px; padding:10px 12px; }
+  .diary-date{ font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:var(--ink-500); text-transform:uppercase; margin-bottom:4px; }
+  .diary-note{ font-size:13.5px; line-height:1.45; }
 </style>
 </head>
 <body>
@@ -248,6 +269,23 @@
     <section class="view" id="view-ajustes">
       <div class="section-label">Ajustes</div>
       <div class="settings-card">
+        <h3>Cuenta y sincronización</h3>
+        <p>Sin cuenta, Escalón funciona igual y todo se queda en este teléfono. Si creas una cuenta, tus hábitos se guardan también en el servidor para que puedas abrir la misma cuenta desde otro dispositivo.</p>
+        <div id="accountLoggedOut">
+          <div class="field"><label>Correo</label><input type="email" id="acc_email" placeholder="tu@correo.com"></div>
+          <div class="field"><label>Contraseña</label><input type="password" id="acc_password" placeholder="Mínimo 8 caracteres"></div>
+          <div class="modal-actions" style="margin-top:0;">
+            <div class="btn" onclick="authAction('login')">Iniciar sesión</div>
+            <div class="btn primary" onclick="authAction('register')">Crear cuenta</div>
+          </div>
+        </div>
+        <div id="accountLoggedIn" style="display:none;">
+          <p id="accountEmailLine" style="color:var(--ink-900); font-weight:600; font-size:13.5px;"></p>
+          <button onclick="syncNow()">Sincronizar ahora</button>
+          <button class="secondary" onclick="logoutAccount()" style="margin-top:8px;">Cerrar sesión</button>
+        </div>
+      </div>
+      <div class="settings-card">
         <h3>Recordatorios</h3>
         <p>Con las notificaciones activadas, Escalón te avisa a la hora que configures en cada hábito aunque la app esté cerrada. Para que funcione en iPhone: agrega Escalón a tu pantalla de inicio (compartir → Añadir a pantalla de inicio) y actívalas desde ahí — Safari no entrega notificaciones push a pestañas normales. Solo se envía al servidor lo necesario para avisarte: el nombre del hábito y la hora del recordatorio; tus registros, rachas y calendario nunca salen del teléfono.</p>
         <button onclick="toggleNotifications()" id="notifBtn">Activar notificaciones</button>
@@ -263,7 +301,7 @@
         <input type="file" id="importFile" accept="application/json" style="margin-bottom:10px; font-size:12px;">
         <button onclick="importData()">Restaurar</button>
       </div>
-      <div class="note">Tus registros, rachas, medallas y calendario viven solo en este teléfono y nunca salen de él. Si activas notificaciones, el nombre y horario de tus hábitos se guardan en un servidor únicamente para poder avisarte.</div>
+      <div class="note">Sin cuenta, tus registros, rachas, medallas y calendario viven solo en este teléfono. Si activas notificaciones, el nombre y horario de tus hábitos se guardan en un servidor únicamente para poder avisarte. Si creas una cuenta, todo tu historial de hábitos se guarda también en el servidor para sincronizarlo entre dispositivos.</div>
     </section>
   </main>
 
@@ -286,14 +324,15 @@
     </div>
     <div class="row2">
       <div class="field">
-        <label>Valor inicial (minutos u otra unidad)</label>
+        <label>Valor inicial</label>
         <input type="number" id="f_start" placeholder="5" min="0" step="0.5">
       </div>
       <div class="field">
         <label>Unidad</label>
-        <input type="text" id="f_unit" placeholder="min, páginas...">
+        <select id="f_unit"></select>
       </div>
     </div>
+    <div class="hint" style="font-size:11.5px; color:var(--ink-500); margin:-10px 0 16px;">Las unidades de tiempo se registran con el cronómetro; las de cantidad se ingresan a mano.</div>
     <div class="field">
       <label>Incremento cada semana</label>
       <input type="number" id="f_increment" placeholder="2" min="0" step="0.5">
@@ -326,6 +365,16 @@
 
 <div id="toast"></div>
 
+<div class="focus-overlay" id="focusOverlay">
+  <button class="focus-minimize" onclick="minimizeFocus()">⌄</button>
+  <div class="focus-icon" id="focusIcon"></div>
+  <div class="focus-name" id="focusName"></div>
+  <div class="focus-timer" id="focusTimerDisplay">00:00</div>
+  <div class="focus-meta" id="focusMeta"></div>
+  <textarea class="focus-note" id="focusNote" placeholder="¿Cómo va esta sesión? (opcional)"></textarea>
+  <button class="focus-stop" onclick="stopTimerFromFocus()">Finalizar sesión</button>
+</div>
+
 <script>
 /* ---------------------------------------------------------
    ESCALÓN — control de hábitos incrementales
@@ -339,12 +388,42 @@ const COLORS = ['#E2933C','#52795F','#B5533F','#4C6B8A','#7A5C99','#2C8C8C'];
 const MILESTONES = [3,7,14,30,60,100,200,365];
 const MEDAL = {3:'🔥',7:'⭐',14:'🥉',30:'🥈',60:'🥇',100:'🏆',200:'💎',365:'👑'};
 
+// Fixed catalog: time-type units are captured only via the timer; count-type
+// units are entered manually. Users can't invent arbitrary unmeasurable units.
+const UNIT_CATALOG = [
+  { id:'seconds', label:'segundos', type:'time' },
+  { id:'minutes', label:'minutos', type:'time' },
+  { id:'hours', label:'horas', type:'time' },
+  { id:'pages', label:'páginas', type:'count' },
+  { id:'words', label:'palabras', type:'count' },
+  { id:'reps', label:'repeticiones', type:'count' },
+  { id:'sets', label:'series', type:'count' },
+  { id:'km', label:'kilómetros', type:'count' },
+  { id:'steps', label:'pasos', type:'count' },
+  { id:'glasses', label:'vasos', type:'count' },
+  { id:'liters', label:'litros', type:'count' },
+  { id:'calories', label:'calorías', type:'count' },
+  { id:'sessions', label:'sesiones', type:'count' },
+];
+function unitDef(id){ return UNIT_CATALOG.find(u=>u.id===id) || UNIT_CATALOG[1]; }
+function secondsToUnitValue(seconds, unitId){
+  if(unitId==='seconds') return Math.round(seconds);
+  if(unitId==='hours') return round1(seconds/3600);
+  return round1(seconds/60);
+}
+
 let state = loadState();
 let currentHabitId = null;
 let calMonthOffset = 0;
 let editingHabitId = null;
 let selectedIcon = ICONS[5];
 let selectedColor = COLORS[0];
+let focusHabitId = null;
+let wakeLock = null;
+let authState = { authenticated:false, email:null };
+let syncDebounceTimer = null;
+
+migrateUnits();
 
 function loadState(){
   try{
@@ -364,7 +443,33 @@ function loadState(){
   }catch(e){}
   return { habits: [] };
 }
-function saveState(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+function saveState(){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  if(authState.authenticated){
+    clearTimeout(syncDebounceTimer);
+    syncDebounceTimer = setTimeout(pushServerState, 1500);
+  }
+}
+
+// Backfills habits/logs created before the fixed unit catalog and per-session tracking existed.
+function migrateUnits(){
+  state.habits.forEach(h=>{
+    if(!h.unitType){
+      const byLabel = UNIT_CATALOG.find(u=>u.label===h.unit || u.id===h.unit);
+      if(byLabel){ h.unitId = byLabel.id; h.unitType = byLabel.type; h.unit = byLabel.label; }
+      else if(/^(min|mins?|minuto)/i.test(h.unit||'')){ h.unitId='minutes'; h.unitType='time'; h.unit='minutos'; }
+      else if(/^(seg|sec)/i.test(h.unit||'')){ h.unitId='seconds'; h.unitType='time'; h.unit='segundos'; }
+      else if(/^(hora|hr|h)$/i.test(h.unit||'')){ h.unitId='hours'; h.unitType='time'; h.unit='horas'; }
+      else { h.unitId='custom'; h.unitType='count'; }
+    }
+    Object.values(h.logs||{}).forEach(log=>{
+      if(!log.sessions){
+        log.sessions = (log.value>0) ? [{ value: log.value, seconds: log.elapsedSeconds||0, note:'', endedAt:null }] : [];
+      }
+    });
+  });
+  saveState();
+}
 
 function todayStr(d = new Date()){
   const y = d.getFullYear(), m = String(d.getMonth()+1).padStart(2,'0'), day = String(d.getDate()).padStart(2,'0');
@@ -446,7 +551,9 @@ function renderHoy(){
   }
   const t = todayStr();
   list.innerHTML = state.habits.map(h=>{
-    const log = h.logs[t] || { done:false, value:0 };
+    const log = h.logs[t] || { done:false, value:0, sessions:[] };
+    const sessions = log.sessions || [];
+    const timeMode = h.unitType === 'time';
     const wIdx = weekIndexFor(h, t);
     const pendingBump = (!h.autoIncrement && wIdx > h.appliedWeekIndex);
     const nextVal = round1(h.currentTarget + h.increment);
@@ -471,19 +578,22 @@ function renderHoy(){
       </div>
 
       <div class="hc-controls">
-        <div class="hc-input">
-          <input type="number" step="0.5" min="0" value="${log.value||''}" placeholder="0" onchange="setLogValue('${h.id}', this.value)">
-          <span>${esc(h.unit)} hoy</span>
-        </div>
+        ${timeMode
+          ? `<div class="hc-input readonly"><span class="hc-today-val">${log.value||0}</span><span>${esc(h.unit)} hoy${sessions.length>1?` · ${sessions.length} sesiones`:''}</span></div>`
+          : `<div class="hc-input">
+              <input type="number" step="0.5" min="0" value="${log.value||''}" placeholder="0" onchange="setLogValue('${h.id}', this.value)">
+              <span>${esc(h.unit)} hoy</span>
+            </div>`}
         <div class="check-btn ${log.done?'on':''}" onclick="toggleDone('${h.id}')">${log.done?'✓':'○'}</div>
       </div>
 
+      ${timeMode ? `
       <div class="timer-row">
         <div class="timer-display ${running?'running':''}" data-timer-id="${h.id}">${formatMMSS(elapsedSec)}</div>
         ${running
           ? `<button class="timer-btn stop" onclick="stopTimer('${h.id}')">Detener</button>`
           : `<button class="timer-btn start" style="background:${h.color}" onclick="startTimer('${h.id}')">Iniciar</button>`}
-      </div>
+      </div>` : ''}
 
       ${rating ? `<div class="rating-badge ${rating.cls}"><span>${rating.label}</span><span>${rating.pct}% de la meta</span></div>` : ''}
 
@@ -535,30 +645,46 @@ function formatMMSS(totalSec){
   const m = Math.floor(totalSec/60), s = totalSec%60;
   return String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
 }
+async function requestWakeLock(){
+  if(!('wakeLock' in navigator)) return;
+  try{ wakeLock = await navigator.wakeLock.request('screen'); }catch(e){}
+}
+function releaseWakeLock(){
+  if(wakeLock){ wakeLock.release().catch(()=>{}); wakeLock = null; }
+}
 function startTimer(id){
   const h = state.habits.find(x=>x.id===id);
   h.timerStart = Date.now();
   saveState();
   renderHoy();
+  requestWakeLock();
+  openFocus(id);
 }
-function stopTimer(id){
+// Each Iniciar/Detener cycle appends a session instead of overwriting the day's
+// value, so starting a habit again later the same day (e.g. more exercise in
+// the evening) adds to the total rather than replacing the morning session.
+function stopTimer(id, note){
   const h = state.habits.find(x=>x.id===id);
   if(!h.timerStart) return;
   const elapsedSec = Math.max(1, Math.round((Date.now()-h.timerStart)/1000));
   h.timerStart = null;
+  releaseWakeLock();
   const t = todayStr();
-  const minutes = round1(elapsedSec/60);
-  if(!h.logs[t]) h.logs[t] = { done:false, value:0 };
-  h.logs[t].value = minutes;
-  h.logs[t].elapsedSeconds = elapsedSec;
-  const rating = computeRating(minutes, h.currentTarget);
-  if(rating.pct>=100) h.logs[t].done = true;
+  const sessionValue = secondsToUnitValue(elapsedSec, h.unitId);
+  if(!h.logs[t]) h.logs[t] = { done:false, value:0, elapsedSeconds:0, sessions:[] };
+  const log = h.logs[t];
+  if(!log.sessions) log.sessions = [];
+  log.sessions.push({ value: sessionValue, seconds: elapsedSec, note: (note||'').trim(), endedAt: Date.now() });
+  log.value = round1(log.sessions.reduce((s,x)=>s+x.value, 0));
+  log.elapsedSeconds = (log.elapsedSeconds||0) + elapsedSec;
+  const rating = computeRating(log.value, h.currentTarget);
+  if(rating.pct>=100) log.done = true;
   saveState();
   const earned = checkBadges(h);
   saveState();
   renderHoy();
   showToast(`Sesión: ${formatMMSS(elapsedSec)} · ${rating.label} (${rating.pct}%)`);
-  if(h.logs[t].done) markDoneRemote(h.id);
+  if(log.done) markDoneRemote(h.id);
   if(earned.length) celebrateBadges(h, earned);
 }
 function updateRunningTimers(){
@@ -568,12 +694,54 @@ function updateRunningTimers(){
       el.textContent = formatMMSS(Math.floor((Date.now()-h.timerStart)/1000));
     }
   });
+  updateFocusTimerDisplay();
 }
 setInterval(updateRunningTimers, 1000);
 
 function celebrateBadges(habit, milestones){
   const top = milestones[milestones.length-1];
   showToast(`${MEDAL[top]} ¡Racha de ${top} días en ${habit.name}!`);
+}
+
+/* ---------------- Focus mode ---------------- */
+function openFocus(id){
+  focusHabitId = id;
+  const h = state.habits.find(x=>x.id===id);
+  const overlay = document.getElementById('focusOverlay');
+  overlay.style.setProperty('--hc', h.color);
+  document.getElementById('focusIcon').textContent = h.icon;
+  document.getElementById('focusName').textContent = h.name;
+  document.getElementById('focusNote').value = '';
+  updateFocusMeta();
+  updateFocusTimerDisplay();
+  overlay.classList.add('show');
+}
+function minimizeFocus(){
+  document.getElementById('focusOverlay').classList.remove('show');
+}
+function updateFocusMeta(){
+  if(!focusHabitId) return;
+  const h = state.habits.find(x=>x.id===focusHabitId);
+  if(!h) return;
+  const streak = getStreak(h);
+  const log = h.logs[todayStr()] || { value:0 };
+  document.getElementById('focusMeta').textContent =
+    `Meta ${h.currentTarget} ${h.unit} · Llevas ${log.value||0} ${h.unit} hoy · Racha ${streak}🔥`;
+}
+function updateFocusTimerDisplay(){
+  if(!focusHabitId) return;
+  const h = state.habits.find(x=>x.id===focusHabitId);
+  if(h && h.timerStart){
+    document.getElementById('focusTimerDisplay').textContent = formatMMSS(Math.floor((Date.now()-h.timerStart)/1000));
+  }
+}
+function stopTimerFromFocus(){
+  if(!focusHabitId) return;
+  const note = document.getElementById('focusNote').value;
+  const id = focusHabitId;
+  document.getElementById('focusOverlay').classList.remove('show');
+  focusHabitId = null;
+  stopTimer(id, note);
 }
 
 /* ---------------- Render: Habitos list ---------------- */
@@ -620,6 +788,7 @@ function renderDetail(){
     const earned = h.badges.includes(m);
     return `<div class="badge-chip ${earned?'':'locked'}"><span class="m">${MEDAL[m]}</span>${m}d</div>`;
   }).join('');
+  const diary = collectDiary(h);
 
   document.getElementById('detalleContent').innerHTML = `
     <div class="detail-head">
@@ -649,12 +818,34 @@ function renderDetail(){
     </div>
     <div class="cal-grid" id="calGrid" style="--hc:${h.color}"></div>
 
+    ${diary.length ? `
+    <div class="section-label">Diario</div>
+    <div class="diary-list">${diary.map(e=>`
+      <div class="diary-entry">
+        <div class="diary-date">${formatDiaryDate(e.date)} · ${e.value} ${esc(h.unit)}</div>
+        <div class="diary-note">${esc(e.note)}</div>
+      </div>`).join('')}</div>
+    ` : ''}
+
     <div class="detail-actions">
       <div class="btn" onclick="openHabitForm('${h.id}')">Editar</div>
       <div class="btn danger" onclick="deleteHabit('${h.id}')">Eliminar</div>
     </div>
   `;
   renderCalendar(h);
+}
+function collectDiary(h){
+  const entries = [];
+  Object.keys(h.logs).forEach(date=>{
+    (h.logs[date].sessions||[]).forEach(s=>{
+      if(s.note) entries.push({ date, ...s });
+    });
+  });
+  entries.sort((a,b)=> (b.endedAt||0) - (a.endedAt||0));
+  return entries;
+}
+function formatDiaryDate(dateStr){
+  return new Date(dateStr+'T00:00:00').toLocaleDateString('es-ES',{day:'numeric', month:'short'});
 }
 const DOWS = ['L','M','X','J','V','S','D'];
 function renderCalendar(h){
@@ -685,6 +876,12 @@ function renderCalendar(h){
 }
 
 /* ---------------- Habit form (create/edit) ---------------- */
+function buildUnitOptions(){
+  const opt = u=>`<option value="${u.id}">${u.label}</option>`;
+  document.getElementById('f_unit').innerHTML =
+    `<optgroup label="Tiempo (cronómetro)">${UNIT_CATALOG.filter(u=>u.type==='time').map(opt).join('')}</optgroup>` +
+    `<optgroup label="Cantidad (manual)">${UNIT_CATALOG.filter(u=>u.type==='count').map(opt).join('')}</optgroup>`;
+}
 function buildPickers(){
   document.getElementById('iconPicker').innerHTML = ICONS.map(i=>
     `<div class="icon-opt ${i===selectedIcon?'selected':''}" onclick="pickIcon('${i}')">${i}</div>`).join('');
@@ -697,12 +894,13 @@ function pickColor(c){ selectedColor=c; buildPickers(); }
 function openHabitForm(id){
   editingHabitId = id || null;
   const overlay = document.getElementById('habitModalOverlay');
+  buildUnitOptions();
   if(id){
     const h = state.habits.find(x=>x.id===id);
     document.getElementById('modalTitle').textContent = 'Editar hábito';
     document.getElementById('f_name').value = h.name;
     document.getElementById('f_start').value = h.startValue;
-    document.getElementById('f_unit').value = h.unit;
+    document.getElementById('f_unit').value = h.unitId || 'minutes';
     document.getElementById('f_increment').value = h.increment;
     document.getElementById('f_auto').classList.toggle('on', h.autoIncrement);
     document.getElementById('f_reminder').value = h.reminderTime || '';
@@ -711,7 +909,7 @@ function openHabitForm(id){
     document.getElementById('modalTitle').textContent = 'Nuevo hábito';
     document.getElementById('f_name').value = '';
     document.getElementById('f_start').value = '';
-    document.getElementById('f_unit').value = '';
+    document.getElementById('f_unit').value = 'minutes';
     document.getElementById('f_increment').value = '';
     document.getElementById('f_auto').classList.remove('on');
     document.getElementById('f_reminder').value = '';
@@ -724,7 +922,7 @@ function closeHabitForm(){ document.getElementById('habitModalOverlay').classLis
 function saveHabitForm(){
   const name = document.getElementById('f_name').value.trim();
   const start = parseFloat(document.getElementById('f_start').value);
-  const unit = document.getElementById('f_unit').value.trim() || 'unid.';
+  const unit = unitDef(document.getElementById('f_unit').value);
   const increment = parseFloat(document.getElementById('f_increment').value) || 0;
   const auto = document.getElementById('f_auto').classList.contains('on');
   const reminder = document.getElementById('f_reminder').value || null;
@@ -733,13 +931,13 @@ function saveHabitForm(){
 
   if(editingHabitId){
     const h = state.habits.find(x=>x.id===editingHabitId);
-    h.name = name; h.unit = unit; h.increment = increment;
+    h.name = name; h.unit = unit.label; h.unitId = unit.id; h.unitType = unit.type; h.increment = increment;
     h.autoIncrement = auto; h.reminderTime = reminder;
     h.icon = selectedIcon; h.color = selectedColor;
   } else {
     const id = 'h_'+Date.now();
     state.habits.push({
-      id, name, unit,
+      id, name, unit: unit.label, unitId: unit.id, unitType: unit.type,
       startValue: start,
       increment,
       autoIncrement: auto,
@@ -860,6 +1058,96 @@ async function renderAjustes(){
   const btn = document.getElementById('notifBtn');
   const sub = await getPushSubscription();
   btn.textContent = sub ? 'Notificaciones activadas ✓ (toca para desactivar)' : 'Activar notificaciones';
+  renderAccountUI();
+}
+
+/* ---------------- Account / cross-device sync (optional, local-first) ---------------- */
+function renderAccountUI(){
+  const loggedOut = document.getElementById('accountLoggedOut');
+  const loggedIn = document.getElementById('accountLoggedIn');
+  if(!loggedOut || !loggedIn) return;
+  loggedOut.style.display = authState.authenticated ? 'none' : 'block';
+  loggedIn.style.display = authState.authenticated ? 'block' : 'none';
+  if(authState.authenticated){
+    document.getElementById('accountEmailLine').textContent = 'Sesión iniciada como ' + authState.email;
+  }
+}
+async function checkAuth(){
+  try{
+    const res = await fetch('/api/auth/me');
+    const data = await res.json();
+    authState = data.authenticated ? { authenticated:true, email:data.email } : { authenticated:false, email:null };
+  }catch(e){
+    authState = { authenticated:false, email:null };
+  }
+  renderAccountUI();
+}
+async function pullServerState(){
+  try{
+    const res = await fetch('/api/sync');
+    if(!res.ok) return null;
+    const data = await res.json();
+    return data.state || null;
+  }catch(e){ return null; }
+}
+async function pushServerState(){
+  if(!authState.authenticated) return;
+  try{
+    await fetch('/api/sync', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ state })
+    });
+  }catch(e){}
+}
+async function resolveSyncConflict(){
+  const server = await pullServerState();
+  const hasLocal = state.habits && state.habits.length > 0;
+  const hasServer = server && Array.isArray(server.habits) && server.habits.length > 0;
+  if(hasServer && hasLocal){
+    const useServer = confirm(
+      'Ya hay hábitos guardados en esta cuenta desde otro dispositivo.\n\n' +
+      'Aceptar: usar esos datos (reemplaza lo de este teléfono).\n' +
+      'Cancelar: mantener lo de este teléfono (reemplaza lo de la cuenta).'
+    );
+    if(useServer){ state = server; localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+    else { await pushServerState(); }
+  } else if(hasServer){
+    state = server; localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } else {
+    await pushServerState();
+  }
+  migrateUnits();
+  reconcileAll();
+  refreshCurrentView();
+}
+async function authAction(kind){
+  const email = document.getElementById('acc_email').value.trim();
+  const password = document.getElementById('acc_password').value;
+  if(!email || !password){ showToast('Completa correo y contraseña'); return; }
+  try{
+    const res = await fetch(`/api/auth/${kind}`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ email, password })
+    });
+    const data = await res.json();
+    if(!res.ok){ showToast(data.error || 'No se pudo completar'); return; }
+    authState = { authenticated:true, email: data.email };
+    document.getElementById('acc_password').value = '';
+    renderAccountUI();
+    showToast(kind==='register' ? 'Cuenta creada' : 'Sesión iniciada');
+    await resolveSyncConflict();
+  }catch(e){ showToast('Error de red, intenta de nuevo'); }
+}
+async function logoutAccount(){
+  try{ await fetch('/api/auth/logout', { method:'POST' }); }catch(e){}
+  authState = { authenticated:false, email:null };
+  renderAccountUI();
+  showToast('Sesión cerrada');
+}
+async function syncNow(){
+  if(!authState.authenticated){ showToast('Inicia sesión primero'); return; }
+  await pushServerState();
+  showToast('Sincronizado');
 }
 function exportData(){
   const blob = new Blob([JSON.stringify(state,null,2)], {type:'application/json'});
@@ -890,7 +1178,13 @@ function importData(){
    Delivery happens server-side via Web Push (see api/send-reminders.js),
    triggered on a schedule by .github/workflows/reminders.yml. The page just
    keeps the server's copy of each habit's reminder time in sync (syncPush). */
-document.addEventListener('visibilitychange', ()=>{ if(!document.hidden){ reconcileAll(); refreshCurrentView(); syncPush(); }});
+document.addEventListener('visibilitychange', ()=>{
+  if(!document.hidden){
+    reconcileAll(); refreshCurrentView(); syncPush();
+    // Wake locks are released by the OS when the tab is hidden; re-acquire if a timer is still running.
+    if(state.habits.some(h=>h.timerStart)) requestWakeLock();
+  }
+});
 
 /* ---------------- Helpers ---------------- */
 function esc(s){ const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
@@ -915,6 +1209,7 @@ reconcileAll();
 renderHoy();
 document.getElementById('fabAdd').style.display = 'none';
 registerSW();
+checkAuth();
 if('storage' in navigator && 'persist' in navigator.storage){
   navigator.storage.persist().catch(()=>{});
 }

@@ -4,24 +4,27 @@
 
 ## Funciones
 
-- **Hábitos incrementales**: defines un valor inicial, una unidad (minutos, páginas...) y un incremento semanal, automático o confirmado a mano.
-- **Hoy**: registra el valor del día, márcalo como cumplido y usa el temporizador integrado para hábitos por tiempo.
+- **Hábitos incrementales**: defines un valor inicial, una unidad y un incremento semanal, automático o confirmado a mano. La unidad se elige de un catálogo fijo — no se pueden inventar unidades no medibles.
+- **Unidades de tiempo vs. cantidad**: `segundos` / `minutos` / `horas` solo se registran con el cronómetro integrado; el resto (`páginas`, `kilómetros`, `repeticiones`, `vasos`, etc.) se ingresan a mano. Cada hábito muestra solo el control que le corresponde.
+- **Sesiones acumulables**: cada ciclo Iniciar/Detener del cronómetro se guarda como una sesión independiente y el total del día es la suma de todas — hacer ejercicio en la mañana y otra vez en la tarde suma, no reemplaza.
+- **Modo foco**: al iniciar el cronómetro, la app pide un *wake lock* (la pantalla no se apaga) y muestra una vista de pantalla completa con el cronómetro, la meta y la racha, más un cuadro de notas opcional para esa sesión.
+- **Diario**: las notas de sesión quedan guardadas y se listan en el detalle de cada hábito, ordenadas de más reciente a más antigua.
 - **Calificación automática** del día según qué tan cerca quedaste de la meta (excelente / bien / incompleto / muy corto).
 - **Rachas y medallas** por constancia (3, 7, 14, 30, 60, 100, 200, 365 días).
-- **Detalle por hábito**: estadísticas, escalera de progresión semanal y calendario mensual de cumplimiento.
+- **Detalle por hábito**: estadísticas, escalera de progresión semanal, calendario mensual de cumplimiento y diario de notas.
 - **Notificaciones push reales**, incluso con la app cerrada (ver abajo).
+- **Cuenta opcional y sincronización entre dispositivos** (ver abajo) — sin cuenta, todo sigue siendo 100% local.
 - **Respaldo manual**: exportar/importar todo el estado como `.json`.
 - Look & feel con convenciones de iOS: barra de pestañas inferior, hojas modales con *grabber*, safe areas, soporte de modo oscuro (`prefers-color-scheme`), estados de presión táctil.
 
 ## Arquitectura
 
-Es, deliberadamente, casi todo un archivo estático:
-
-- [`index.html`](index.html) — toda la UI, estilos y lógica de la app (vanilla JS, sin build step). El estado de hábitos vive en `localStorage` del navegador; nunca se sube a ningún servidor.
+- [`index.html`](index.html) — toda la UI, estilos y lógica de la app (vanilla JS, sin build step). El estado de hábitos vive en `localStorage` del navegador por defecto.
 - [`manifest.json`](manifest.json) — hace la app instalable como PWA.
 - [`sw.js`](sw.js) — service worker: cachea el *app shell* para uso sin conexión y muestra las notificaciones push.
 - [`middleware.js`](middleware.js) — Vercel Edge Middleware que añade cabeceras de seguridad (`X-Frame-Options`, HSTS, etc.) a cada respuesta.
-- [`api/`](api) — funciones serverless de Vercel que dan soporte a las notificaciones push (ver abajo). Es la única parte que toca un servidor; todo lo demás (registros, rachas, calendario) sigue siendo 100% local.
+- [`lib/auth.js`](lib/auth.js) — hashing de contraseñas (`scrypt` nativo de Node) y manejo de sesiones por cookie, compartido por las rutas de `api/auth/`.
+- [`api/`](api) — funciones serverless de Vercel: notificaciones push, autenticación y sincronización (ver abajo). Es la única parte que toca un servidor; sin cuenta y sin notificaciones activadas, todo el estado sigue siendo 100% local.
 
 ## Cómo funcionan las notificaciones
 
@@ -37,24 +40,36 @@ Por eso el envío es real Web Push con un componente de servidor mínimo:
 
 **Importante**: por el intervalo del cron (5 min) y la naturaleza de GitHub Actions, el aviso llega en una ventana de ~5–10 minutos alrededor de la hora configurada, no al minuto exacto. Solo el nombre del hábito y su horario viajan al servidor — el resto del estado (valores registrados, rachas, calendario) permanece únicamente en el teléfono.
 
-### Puesta en marcha del backend de notificaciones
+## Cuenta y sincronización entre dispositivos
 
-1. **Vercel KV**: en el dashboard del proyecto, agrega un almacén KV (Storage → Create → KV) y conéctalo al proyecto. Esto crea automáticamente las variables `KV_REST_API_URL` y `KV_REST_API_TOKEN`.
-2. **Llaves VAPID**: genera un par con `npx web-push generate-vapid-keys` y añade en Vercel:
+En **Ajustes → Cuenta y sincronización** se puede crear una cuenta (correo + contraseña) para llevar los hábitos a otro dispositivo. Es opcional y local-first:
+
+- Sin cuenta, nada cambia respecto a antes: todo vive solo en `localStorage`.
+- Al crear cuenta o iniciar sesión, si ya había datos en el servidor de un dispositivo anterior, la app pregunta si quieres usar esos datos o subir los de este teléfono (sin fusionar automáticamente — evita perder historial por accidente).
+- Mientras haya sesión iniciada, cada cambio se sincroniza al servidor solo (con un pequeño *debounce*), además del botón manual **Sincronizar ahora**.
+- Autenticación: contraseñas con `scrypt` + salt (nunca en texto plano), sesión por cookie `httpOnly`/`Secure` con token opaco guardado en Redis (no JWT, así cerrar sesión invalida el token de inmediato). No incluye verificación de correo ni "olvidé mi contraseña" — es un MVP; si se necesita, es un siguiente paso.
+- Los datos sincronizados son el mismo JSON que ya vive en el teléfono (hábitos, registros, notas incluidas). Sin cuenta, nada de eso sale del dispositivo.
+
+## Puesta en marcha del backend (notificaciones + cuentas)
+
+Notificaciones push y cuentas de usuario comparten el mismo almacén Redis.
+
+1. **Redis (Upstash vía Vercel Marketplace)**: en el dashboard del proyecto → Storage → Create Database → **Upstash** → tipo **Redis**, y conéctalo al proyecto. Vercel retiró el producto nativo "KV" en dic. 2024; la integración de Upstash es la que sigue inyectando `KV_REST_API_URL` y `KV_REST_API_TOKEN`, que es lo que usa `@vercel/kv` en este código — no hace falta cambiar nada más.
+2. **Llaves VAPID** (para push): genera un par con `npx web-push generate-vapid-keys` y añade en Vercel:
    - `VAPID_PUBLIC_KEY`
    - `VAPID_PRIVATE_KEY`
    - `VAPID_SUBJECT` (por ejemplo `mailto:tu@correo.com`)
-3. **`CRON_SECRET`**: genera un valor aleatorio (`openssl rand -hex 32`) y agrégalo como variable de entorno en Vercel.
-4. **GitHub Actions**: en el repo, ve a Settings → Secrets and variables → Actions y crea:
+3. **`CRON_SECRET`** (para push): genera un valor aleatorio (`openssl rand -hex 32`) y agrégalo como variable de entorno en Vercel.
+4. **GitHub Actions** (para push): en el repo, ve a Settings → Secrets and variables → Actions y crea:
    - `APP_URL` — la URL desplegada (ej. `https://escalon.vercel.app`, sin `/` final)
    - `CRON_SECRET` — el mismo valor del paso 3
-5. Redepliega. Desde **Ajustes → Activar notificaciones** en el iPhone (con la app ya instalada en pantalla de inicio) se completa la suscripción.
+5. Redepliega. Las cuentas funcionan en cuanto Redis está conectado (paso 1); las notificaciones necesitan además los pasos 2–4.
 
-Si no configuras esto, la app sigue funcionando con normalidad — solo el botón de notificaciones no logrará suscribirse.
+Si no configuras nada de esto, la app sigue funcionando con normalidad en modo local — solo los botones de notificaciones y de cuenta no lograrán completar la llamada al servidor.
 
 ## Desarrollo local
 
-No hay build step. Para probar la UI basta con abrir `index.html` en un navegador o servirlo con cualquier servidor estático. Las rutas `/api/*` requieren `vercel dev` (con las variables de entorno de arriba) para probarse localmente.
+No hay build step. Para probar la UI basta con abrir `index.html` en un navegador o servirlo con cualquier servidor estático. Las rutas `/api/*` (notificaciones, cuentas, sync) requieren `vercel dev` con las variables de entorno de arriba para probarse localmente.
 
 ## Despliegue
 
