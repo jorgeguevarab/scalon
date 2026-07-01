@@ -40,6 +40,7 @@ module.exports = async (req, res) => {
   const ids = await kv.smembers('subs:index');
   const now = new Date();
   let sent = 0, pruned = 0;
+  const debug = [];
 
   for (const id of ids) {
     const record = await kv.get(`sub:${id}`);
@@ -55,12 +56,17 @@ module.exports = async (req, res) => {
     let dropSub = false;
 
     for (const r of (record.reminders || [])) {
-      if (!r.time || !r.habitId) continue;
+      if (!r.time || !r.habitId) { debug.push({ sub: id.slice(0, 8), skip: 'no time/habitId', r }); continue; }
       const [hh, mm] = r.time.split(':').map(Number);
       const remMin = hh * 60 + mm;
       const withinWindow = remMin <= nowMin && nowMin - remMin < 6;
+      const alreadySentToday = lastSent[r.habitId] === today;
+      debug.push({
+        sub: id.slice(0, 8), habit: r.name, time: r.time, tz,
+        nowMin, remMin, withinWindow, alreadySentToday, today,
+      });
       if (!withinWindow) continue;
-      if (lastSent[r.habitId] === today) continue;
+      if (alreadySentToday) continue;
 
       try {
         await webpush.sendNotification(record.subscription, JSON.stringify({
@@ -73,6 +79,7 @@ module.exports = async (req, res) => {
         changed = true;
         sent++;
       } catch (err) {
+        debug.push({ sub: id.slice(0, 8), sendError: err.message, statusCode: err.statusCode });
         if (err.statusCode === 404 || err.statusCode === 410) { dropSub = true; break; }
       }
     }
@@ -87,5 +94,6 @@ module.exports = async (req, res) => {
     }
   }
 
+  console.log('send-reminders debug', JSON.stringify(debug));
   res.status(200).json({ ok: true, checked: ids.length, sent, pruned });
 };
