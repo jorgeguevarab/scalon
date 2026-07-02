@@ -53,11 +53,18 @@ self.addEventListener('push', (event) => {
 
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
-  const targetUrl = self.registration.scope;
+  const habitId = event.notification.data && event.notification.data.habitId;
+  const scope = self.registration.scope;
+  const targetUrl = habitId ? `${scope}?habit=${encodeURIComponent(habitId)}` : scope;
+
   event.waitUntil(
-    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clients) => {
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(async (clients) => {
       for (const client of clients) {
-        if (client.url.startsWith(targetUrl) && 'focus' in client) return client.focus();
+        if (client.url.startsWith(scope) && 'focus' in client) {
+          await client.focus();
+          if (habitId) client.postMessage({ type: 'open-habit', habitId });
+          return;
+        }
       }
       if (self.clients.openWindow) return self.clients.openWindow(targetUrl);
     })
