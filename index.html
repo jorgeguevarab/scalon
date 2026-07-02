@@ -129,6 +129,15 @@
   .bump-badge{ margin-top:10px; padding:9px 12px; border-radius:10px; background:var(--ink-900); color:var(--paper); font-size:12.5px; display:flex; justify-content:space-between; align-items:center; gap:10px; }
   .bump-badge button{ background:var(--amber); color:var(--ink-900); border:none; border-radius:8px; padding:6px 10px; font-size:12px; font-weight:600; font-family:'IBM Plex Mono',monospace; cursor:pointer; white-space:nowrap; }
 
+  .note-block{margin-top:10px;}
+  .note-add-btn{ font-size:12.5px; color:var(--ink-500); cursor:pointer; display:inline-flex; align-items:center; gap:5px; }
+  .note-add-btn:active{opacity:.6;}
+  .note-text{ font-size:13px; line-height:1.5; color:var(--ink-700); background:var(--paper); border:1px solid var(--rule); border-radius:10px; padding:9px 11px; word-break:break-word; white-space:pre-wrap; }
+  .note-text a{ color:var(--hc,var(--amber)); text-decoration:underline; }
+  .note-edit-row{margin-top:5px;}
+  .note-edit-btn{ font-size:11.5px; color:var(--ink-500); cursor:pointer; }
+  .note-edit-btn:active{opacity:.6;}
+
   .empty-state{ text-align:center; padding:50px 20px; color:var(--ink-500); }
   .empty-state .display{ font-size:19px; color:var(--ink-900); margin-bottom:6px; }
   .empty-state p{font-size:13.5px; line-height:1.5; margin:0 0 18px;}
@@ -203,7 +212,8 @@
   .modal h2{font-family:'Fraunces',serif; font-size:21px; margin:0 0 18px;}
   .field{margin-bottom:16px;}
   .field label{display:block; font-family:'IBM Plex Mono',monospace; font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-500); margin-bottom:6px;}
-  .field input, .field select{ width:100%; padding:11px 12px; border:1px solid var(--rule); border-radius:10px; background:var(--input-bg); font-size:15px; font-family:'Inter',sans-serif; color:var(--ink-900); }
+  .field input, .field select, .field textarea{ width:100%; padding:11px 12px; border:1px solid var(--rule); border-radius:10px; background:var(--input-bg); font-size:15px; font-family:'Inter',sans-serif; color:var(--ink-900); }
+  .field textarea{ min-height:100px; resize:vertical; }
   .row2{display:flex; gap:12px;}
   .row2 .field{flex:1;}
   .toggle-row{display:flex; justify-content:space-between; align-items:center; padding:10px 2px;}
@@ -251,7 +261,8 @@
   .diary-list{display:flex; flex-direction:column; gap:10px; margin-bottom:6px;}
   .diary-entry{ background:var(--paper-alt); border:1px solid var(--rule); border-radius:10px; padding:10px 12px; }
   .diary-date{ font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:var(--ink-500); text-transform:uppercase; margin-bottom:4px; }
-  .diary-note{ font-size:13.5px; line-height:1.45; }
+  .diary-note{ font-size:13.5px; line-height:1.45; word-break:break-word; }
+  .diary-note a{ color:var(--amber); text-decoration:underline; }
 
   /* ---------- Notifications ---------- */
   .notif-card{ position:relative; background:var(--paper-alt); border:1px solid var(--rule); border-left:3px solid var(--rule); border-radius:var(--radius); padding:14px 38px 14px 16px; margin-bottom:12px; }
@@ -290,6 +301,8 @@
   .hoy-grid .timer-btn{padding:7px 9px; font-size:11px;}
   .hoy-grid .rating-badge{font-size:10.5px; padding:6px 9px;}
   .hoy-grid .bump-badge{font-size:11px; padding:7px 9px; flex-wrap:wrap;}
+  .hoy-grid .note-text{font-size:11.5px; padding:7px 9px;}
+  .hoy-grid .note-add-btn, .hoy-grid .note-edit-btn{font-size:11px;}
   @media (max-width:380px){ .hoy-grid{grid-template-columns:1fr;} }
 
   nav.bottom button .ic{position:relative;}
@@ -462,6 +475,20 @@
     <div class="modal-actions">
       <div class="btn" onclick="closeHabitForm()">Cancelar</div>
       <div class="btn primary" onclick="saveHabitForm()">Guardar</div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="noteModalOverlay">
+  <div class="modal">
+    <div class="grabber"></div>
+    <h2>Nota</h2>
+    <div class="field">
+      <textarea id="f_dayNote" placeholder="Escribe una nota — puedes incluir enlaces, se vuelven clicables"></textarea>
+    </div>
+    <div class="modal-actions">
+      <div class="btn" onclick="closeNoteModal()">Cancelar</div>
+      <div class="btn primary" onclick="saveNoteModal()">Guardar</div>
     </div>
   </div>
 </div>
@@ -724,6 +751,13 @@ function renderHoy(){
       </div>` : ''}
 
       ${rating ? `<div class="rating-badge ${rating.cls}"><span>${rating.label}</span><span>${rating.pct}% de la meta</span></div>` : ''}
+
+      ${(log.value>0 || log.done) ? `
+      <div class="note-block">
+        ${log.dayNote
+          ? `<div class="note-text">${linkify(log.dayNote)}</div><div class="note-edit-row"><span class="note-edit-btn" onclick="openNoteModal('${h.id}')">✎ Editar nota</span></div>`
+          : `<div class="note-add-btn" onclick="openNoteModal('${h.id}')">📝 Agregar nota</div>`}
+      </div>` : ''}
 
       ${pendingBump ? `
       <div class="bump-badge">
@@ -1028,7 +1062,7 @@ function renderDetail(){
     <div class="diary-list">${diary.map(e=>`
       <div class="diary-entry">
         <div class="diary-date">${formatDiaryDate(e.date)} · ${e.value} ${esc(h.unit)}</div>
-        <div class="diary-note">${esc(e.note)}</div>
+        <div class="diary-note">${linkify(e.note)}</div>
       </div>`).join('')}</div>
     ` : ''}
 
@@ -1042,9 +1076,11 @@ function renderDetail(){
 function collectDiary(h){
   const entries = [];
   Object.keys(h.logs).forEach(date=>{
-    (h.logs[date].sessions||[]).forEach(s=>{
-      if(s.note) entries.push({ date, ...s });
+    const log = h.logs[date];
+    (log.sessions||[]).forEach(s=>{
+      if(s.note) entries.push({ date, note:s.note, value:s.value, endedAt:s.endedAt||0 });
     });
+    if(log.dayNote) entries.push({ date, note:log.dayNote, value:log.value, endedAt:log.dayNoteAt||0 });
   });
   entries.sort((a,b)=> (b.endedAt||0) - (a.endedAt||0));
   return entries;
@@ -1193,6 +1229,33 @@ function openHabitForm(id){
   overlay.classList.add('show');
 }
 function closeHabitForm(){ document.getElementById('habitModalOverlay').classList.remove('show'); }
+
+/* ---------------- Day notes (added after registering a habit for the day) ---------------- */
+let noteHabitId = null;
+function openNoteModal(habitId){
+  noteHabitId = habitId;
+  const h = state.habits.find(x=>x.id===habitId);
+  const log = h.logs[todayStr()] || {};
+  document.getElementById('f_dayNote').value = log.dayNote || '';
+  document.getElementById('noteModalOverlay').classList.add('show');
+}
+function closeNoteModal(){
+  document.getElementById('noteModalOverlay').classList.remove('show');
+  noteHabitId = null;
+}
+function saveNoteModal(){
+  if(!noteHabitId) return;
+  const h = state.habits.find(x=>x.id===noteHabitId);
+  const t = todayStr();
+  if(!h.logs[t]) h.logs[t] = { done:false, value:0, sessions:[] };
+  const note = document.getElementById('f_dayNote').value.trim();
+  h.logs[t].dayNote = note;
+  h.logs[t].dayNoteAt = Date.now();
+  saveState();
+  closeNoteModal();
+  renderHoy();
+  showToast(note ? 'Nota guardada' : 'Nota eliminada');
+}
 function saveHabitForm(){
   const name = document.getElementById('f_name').value.trim();
   const start = parseFloat(document.getElementById('f_start').value);
@@ -1673,6 +1736,18 @@ document.addEventListener('visibilitychange', ()=>{
 
 /* ---------------- Helpers ---------------- */
 function esc(s){ const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
+// Escapes first, then wraps http(s)/www URLs found in the *escaped* text with
+// anchor tags — safe because user input never becomes raw HTML except for the
+// <a> wrapper we add ourselves around substrings we matched.
+function linkify(s){
+  const escaped = esc(s || '');
+  return escaped.replace(/(https?:\/\/[^\s<]+|www\.[^\s<]+)/gi, (match) => {
+    let trail = '';
+    while(match.length && /[.,;:!?)]$/.test(match)){ trail = match.slice(-1) + trail; match = match.slice(0, -1); }
+    const href = /^https?:\/\//i.test(match) ? match : 'https://' + match;
+    return `<a href="${href}" target="_blank" rel="noopener noreferrer">${match}</a>${trail}`;
+  });
+}
 function showToast(msg){
   const el = document.getElementById('toast');
   el.textContent = msg;
