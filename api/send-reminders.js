@@ -21,6 +21,12 @@ function minutesInTz(date, timeZone) {
 function dateKeyInTz(date, timeZone) {
   return new Intl.DateTimeFormat('en-CA', { timeZone }).format(date); // YYYY-MM-DD
 }
+// Weekday (0=Sun..6=Sat, matching JS Date#getDay) for a YYYY-MM-DD calendar date,
+// independent of the server's own timezone — `dateKey` already reflects the
+// subscriber's local date, so parsing it at noon just reads off the weekday.
+function weekdayFromDateKey(dateKey) {
+  return new Date(`${dateKey}T12:00:00`).getDay();
+}
 
 // Called every ~5 min by an external cron (cron-job.org — see README). GitHub Actions'
 // `schedule` trigger was tried first but is best-effort and skipped windows >10 min.
@@ -40,7 +46,6 @@ module.exports = async (req, res) => {
   const ids = await kv.smembers('subs:index');
   const now = new Date();
   let sent = 0, pruned = 0;
-  const debug = [];
 
   for (const id of ids) {
     const record = await kv.get(`sub:${id}`);
@@ -50,23 +55,20 @@ module.exports = async (req, res) => {
     let nowMin, today;
     try { nowMin = minutesInTz(now, tz); today = dateKeyInTz(now, tz); }
     catch (e) { nowMin = minutesInTz(now, 'UTC'); today = dateKeyInTz(now, 'UTC'); }
+    const todayDow = weekdayFromDateKey(today);
 
     const lastSent = record.lastSent || {};
     let changed = false;
     let dropSub = false;
 
     for (const r of (record.reminders || [])) {
-      if (!r.time || !r.habitId) { debug.push({ sub: id.slice(0, 8), skip: 'no time/habitId', r }); continue; }
+      if (!r.time || !r.habitId) continue;
+      if (Array.isArray(r.days) && r.days.length && !r.days.includes(todayDow)) continue; // not scheduled today
       const [hh, mm] = r.time.split(':').map(Number);
       const remMin = hh * 60 + mm;
       const withinWindow = remMin <= nowMin && nowMin - remMin < 6;
-      const alreadySentToday = lastSent[r.habitId] === today;
-      debug.push({
-        sub: id.slice(0, 8), habit: r.name, time: r.time, tz,
-        nowMin, remMin, withinWindow, alreadySentToday, today,
-      });
       if (!withinWindow) continue;
-      if (alreadySentToday) continue;
+      if (lastSent[r.habitId] === today) continue;
 
       try {
         await webpush.sendNotification(record.subscription, JSON.stringify({
@@ -79,7 +81,6 @@ module.exports = async (req, res) => {
         changed = true;
         sent++;
       } catch (err) {
-        debug.push({ sub: id.slice(0, 8), sendError: err.message, statusCode: err.statusCode });
         if (err.statusCode === 404 || err.statusCode === 410) { dropSub = true; break; }
       }
     }
@@ -94,6 +95,5 @@ module.exports = async (req, res) => {
     }
   }
 
-  console.log('send-reminders debug', JSON.stringify(debug));
   res.status(200).json({ ok: true, checked: ids.length, sent, pruned });
 };

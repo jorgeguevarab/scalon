@@ -147,6 +147,7 @@
   .habit-row:last-child{border-bottom:none;}
   .habit-row .name{font-family:'Fraunces',serif; font-weight:600; font-size:16px;}
   .habit-row .meta{font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--ink-500); margin-top:2px;}
+  .cat-chip{ display:inline-flex; align-items:center; gap:3px; font-size:10.5px; color:var(--ink-500); background:var(--paper); border:1px solid var(--rule); border-radius:10px; padding:1px 7px; vertical-align:middle; }
   .habit-row .arrow{color:var(--ink-500); font-size:18px;}
 
   .fab{ position:fixed; bottom:calc(112px + var(--safe-bottom)); right:calc(50% - 260px + 18px); width:54px; height:54px; border-radius:50%; background:var(--amber); color:var(--ink-900); font-size:26px; border:1px solid rgba(255,255,255,.4); box-shadow:0 8px 20px rgba(0,0,0,.3), inset 0 1px 1px rgba(255,255,255,.5); display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:20; transition:transform .1s ease; }
@@ -232,6 +233,12 @@
   .color-opt.selected{border-color:var(--ink-900);}
   .color-opt.selected::after{content:'✓'; color:#fff; font-size:14px;}
 
+  .segmented{display:flex; border:1px solid var(--rule); border-radius:10px; overflow:hidden;}
+  .seg-opt{flex:1; padding:9px 6px; border:none; background:var(--paper); color:var(--ink-700); font-size:12px; font-family:'Inter',sans-serif; cursor:pointer; border-right:1px solid var(--rule);}
+  .seg-opt:last-child{border-right:none;}
+  .seg-opt.active{background:var(--ink-900); color:var(--paper);}
+  .day-chip{width:36px; height:36px; font-size:12px; font-family:'IBM Plex Mono',monospace;}
+
   .settings-card{ background:var(--paper-alt); border:1px solid var(--rule); border-radius:var(--radius); padding:16px; margin-bottom:14px; }
   .settings-card h3{font-family:'Fraunces',serif; font-size:15.5px; margin:0 0 6px;}
   .settings-card p{font-size:13px; color:var(--ink-500); line-height:1.5; margin:0 0 12px;}
@@ -272,9 +279,19 @@
   .notif-card.missed{border-left-color:var(--danger);}
   .notif-card.forgotten{border-left-color:var(--ink-500);}
   .notif-card.suggestion{border-left-color:var(--moss);}
+  .notif-card.reminder{border-left-color:#4C6B8A;}
   .notif-card .nc-action{margin-top:10px; display:inline-block; padding:8px 14px;}
   .notif-dismiss{ position:absolute; top:8px; right:8px; width:24px; height:24px; border-radius:50%; border:none; background:transparent; color:var(--ink-500); font-size:16px; line-height:1; cursor:pointer; display:flex; align-items:center; justify-content:center; }
   .notif-dismiss:active{background:var(--rule);}
+
+  .cat-card{ background:var(--paper-alt); border:1px solid var(--rule); border-radius:var(--radius); padding:14px 16px; margin-bottom:12px; }
+  .cat-head{display:flex; align-items:center; gap:8px; margin-bottom:8px;}
+  .cat-ic{font-size:16px;}
+  .cat-name{font-family:'Fraunces',serif; font-weight:600; font-size:14.5px; flex:1;}
+  .cat-count{font-size:11px; color:var(--ink-500); font-family:'IBM Plex Mono',monospace;}
+  .cat-bar{height:6px; border-radius:3px; background:var(--rule); overflow:hidden; margin-bottom:6px;}
+  .cat-bar-fill{height:100%; background:var(--amber); border-radius:3px;}
+  .cat-meta{font-size:11.5px; color:var(--ink-500); font-family:'IBM Plex Mono',monospace;}
 
   .hoy-head{display:flex; justify-content:space-between; align-items:center;}
   .clear-all-link{font-size:11px; color:var(--amber); cursor:pointer;}
@@ -462,7 +479,20 @@
     </div>
     <div class="field">
       <label>Hora del recordatorio (opcional)</label>
-      <input type="time" id="f_reminder">
+      <input type="time" id="f_reminder" onchange="onReminderTimeChange()">
+    </div>
+    <div class="field" id="reminderRepeatField" style="display:none;">
+      <label>Repetir</label>
+      <div class="segmented" id="repeatSegmented">
+        <button type="button" class="seg-opt" data-val="daily" onclick="setReminderRepeat('daily')">Diario</button>
+        <button type="button" class="seg-opt" data-val="weekdays" onclick="setReminderRepeat('weekdays')">Entre semana</button>
+        <button type="button" class="seg-opt" data-val="custom" onclick="setReminderRepeat('custom')">Personalizado</button>
+      </div>
+      <div class="picker-row" id="dayPicker" style="margin-top:10px; display:none;"></div>
+    </div>
+    <div class="field">
+      <label>Categoría (opcional)</label>
+      <select id="f_category"></select>
     </div>
     <div class="field">
       <label>Ícono</label>
@@ -513,8 +543,28 @@
 --------------------------------------------------------- */
 
 const STORAGE_KEY = 'escalon_data_v2';
-const ICONS = ['🏃','📖','✍️','🧘','💧','🎯','🎸','🧠','🎨','💻','🌱','⏱️'];
-const COLORS = ['#E2933C','#52795F','#B5533F','#4C6B8A','#7A5C99','#2C8C8C'];
+const ICONS = [
+  '🏃','📖','✍️','🧘','💧','🎯','🎸','🧠','🎨','💻','🌱','⏱️',
+  '🏋️','🚴','🏊','🍎','🥗','😴','☀️','🌙','🙏','📿','🕯️',
+  '👨‍👩‍👧','❤️','📞','💰','🎓','🗣️','🧹','🚶','🦷','💊','🩺','🎧',
+  '🎹','🎤','📷','♟️','🐶','🌻','☕','📵','🛏️','🧴','🌳','🧾'
+];
+const COLORS = [
+  '#E2933C','#52795F','#B5533F','#4C6B8A','#7A5C99','#2C8C8C',
+  '#C2571C','#8A6D3B','#3D6647','#5B7FA6','#9C4F6B','#2F4858','#A67C52','#7C9070'
+];
+const CATEGORY_CATALOG = [
+  { id:'spiritual', icon:'🙏', label:'Espiritual' },
+  { id:'health', icon:'💪', label:'Salud física' },
+  { id:'family', icon:'👨‍👩‍👧', label:'Familia' },
+  { id:'mind', icon:'🧘', label:'Mente y bienestar' },
+  { id:'work', icon:'💼', label:'Trabajo y estudio' },
+  { id:'finance', icon:'💰', label:'Finanzas' },
+  { id:'social', icon:'🤝', label:'Social' },
+  { id:'creativity', icon:'🎨', label:'Creatividad' },
+  { id:'home', icon:'🏠', label:'Hogar' },
+];
+function categoryDef(id){ return CATEGORY_CATALOG.find(c=>c.id===id) || null; }
 const MILESTONES = [3,7,14,30,60,100,200,365];
 const MEDAL = {3:'🔥',7:'⭐',14:'🥉',30:'🥈',60:'🥇',100:'🏆',200:'💎',365:'👑'};
 const HABIT_CATEGORY_SUGGESTIONS = [
@@ -554,6 +604,8 @@ let calMonthOffset = 0;
 let editingHabitId = null;
 let selectedIcon = ICONS[5];
 let selectedColor = COLORS[0];
+let reminderRepeat = 'daily';
+let reminderCustomDays = [];
 let focusHabitId = null;
 let wakeLock = null;
 let authState = { authenticated:false, email:null };
@@ -926,12 +978,14 @@ function renderHabitos(){
   chartsWrap.innerHTML = renderTrendCharts();
   list.innerHTML = state.habits.map(h=>{
     const streak = getStreak(h);
+    const cat = categoryDef(h.categoryId);
+    const reminder = reminderSummary(h);
     return `
     <div class="habit-row" onclick="openDetail('${h.id}')">
       <div class="hc-icon" style="--hc:${h.color}; width:36px; height:36px; font-size:16px;">${h.icon}</div>
       <div style="flex:1">
-        <div class="name">${esc(h.name)}</div>
-        <div class="meta">${h.currentTarget} ${esc(h.unit)} · +${h.increment}/sem · ${h.autoIncrement?'auto':'manual'} ${streak>0?'· 🔥 '+streak:''}</div>
+        <div class="name">${esc(h.name)}${cat?` <span class="cat-chip">${cat.icon} ${esc(cat.label)}</span>`:''}</div>
+        <div class="meta">${h.currentTarget} ${esc(h.unit)} · +${h.increment}/sem · ${h.autoIncrement?'auto':'manual'} ${streak>0?'· 🔥 '+streak:''}${reminder?' · '+reminder:''}</div>
       </div>
       <div class="arrow">›</div>
     </div>`;
@@ -1029,6 +1083,8 @@ function renderDetail(){
   }).join('');
   const diary = collectDiary(h);
 
+  const detailCat = categoryDef(h.categoryId);
+  const detailReminder = reminderSummary(h);
   document.getElementById('detalleContent').innerHTML = `
     <div class="detail-head">
       <div class="detail-icon" style="--hc:${h.color}">${h.icon}</div>
@@ -1037,6 +1093,7 @@ function renderDetail(){
       </div>
     </div>
     <div class="detail-sub">${h.currentTarget} ${esc(h.unit)} actuales · sube ${h.increment} ${esc(h.unit)}/semana (${h.autoIncrement?'automático':'manual'})</div>
+    ${(detailCat || detailReminder) ? `<div class="detail-sub" style="margin-top:-14px;">${[detailCat?`${detailCat.icon} ${esc(detailCat.label)}`:'', detailReminder].filter(Boolean).join(' · ')}</div>` : ''}
 
     <div class="stat-row" style="--hc:${h.color}">
       <div class="stat-box"><div class="n">${streak}</div><div class="l">Racha actual</div></div>
@@ -1089,6 +1146,16 @@ function formatDiaryDate(dateStr){
   return new Date(dateStr+'T00:00:00').toLocaleDateString('es-ES',{day:'numeric', month:'short'});
 }
 const DOWS = ['L','M','X','J','V','S','D'];
+// h.reminderDays holds JS Date.getDay() values (0=Sun..6=Sat); null/undefined/all-7 means daily.
+function reminderSummary(h){
+  if(!h.reminderTime) return '';
+  if(!h.reminderDays || h.reminderDays.length===7) return `⏰ ${h.reminderTime} · diario`;
+  if(h.reminderDays.length===5 && [1,2,3,4,5].every(d=>h.reminderDays.includes(d))) return `⏰ ${h.reminderTime} · L-V`;
+  const map = {0:'D',1:'L',2:'M',3:'X',4:'J',5:'V',6:'S'};
+  const order = [1,2,3,4,5,6,0];
+  const days = order.filter(d=>h.reminderDays.includes(d)).map(d=>map[d]).join(',');
+  return `⏰ ${h.reminderTime} · ${days}`;
+}
 function renderCalendar(h){
   const base = new Date();
   base.setDate(1);
@@ -1200,11 +1267,41 @@ function buildPickers(){
 }
 function pickIcon(i){ selectedIcon=i; buildPickers(); }
 function pickColor(c){ selectedColor=c; buildPickers(); }
+function buildCategoryOptions(){
+  document.getElementById('f_category').innerHTML = `<option value="">Sin categoría</option>` +
+    CATEGORY_CATALOG.map(c=>`<option value="${c.id}">${c.icon} ${c.label}</option>`).join('');
+}
+
+/* ---------------- Reminder recurrence (daily / weekdays / custom days) ---------------- */
+function onReminderTimeChange(){
+  const has = !!document.getElementById('f_reminder').value;
+  document.getElementById('reminderRepeatField').style.display = has ? 'block' : 'none';
+}
+function setReminderRepeat(val){
+  reminderRepeat = val;
+  document.querySelectorAll('#repeatSegmented .seg-opt').forEach(b=> b.classList.toggle('active', b.dataset.val===val));
+  document.getElementById('dayPicker').style.display = val==='custom' ? 'flex' : 'none';
+  if(val==='custom') buildDayPicker();
+}
+function toggleReminderDay(jsDay){
+  const pos = reminderCustomDays.indexOf(jsDay);
+  if(pos===-1) reminderCustomDays.push(jsDay); else reminderCustomDays.splice(pos,1);
+  buildDayPicker();
+}
+// Chips render Mon->Sun (matching DOWS/calendar order) but store JS Date.getDay() values (0=Sun..6=Sat).
+function buildDayPicker(){
+  document.getElementById('dayPicker').innerHTML = DOWS.map((d,i)=>{
+    const jsDay = (i+1)%7;
+    const on = reminderCustomDays.includes(jsDay);
+    return `<div class="icon-opt day-chip ${on?'selected':''}" onclick="toggleReminderDay(${jsDay})">${d}</div>`;
+  }).join('');
+}
 
 function openHabitForm(id){
   editingHabitId = id || null;
   const overlay = document.getElementById('habitModalOverlay');
   buildUnitOptions();
+  buildCategoryOptions();
   if(id){
     const h = state.habits.find(x=>x.id===id);
     document.getElementById('modalTitle').textContent = 'Editar hábito';
@@ -1214,7 +1311,16 @@ function openHabitForm(id){
     document.getElementById('f_increment').value = h.increment;
     document.getElementById('f_auto').classList.toggle('on', h.autoIncrement);
     document.getElementById('f_reminder').value = h.reminderTime || '';
+    document.getElementById('f_category').value = h.categoryId || '';
     selectedIcon = h.icon; selectedColor = h.color;
+    if(h.reminderTime){
+      if(!h.reminderDays || h.reminderDays.length===7) reminderRepeat = 'daily';
+      else if(h.reminderDays.length===5 && [1,2,3,4,5].every(d=>h.reminderDays.includes(d))) reminderRepeat = 'weekdays';
+      else reminderRepeat = 'custom';
+      reminderCustomDays = h.reminderDays ? [...h.reminderDays] : [];
+    } else {
+      reminderRepeat = 'daily'; reminderCustomDays = [];
+    }
   } else {
     document.getElementById('modalTitle').textContent = 'Nuevo hábito';
     document.getElementById('f_name').value = '';
@@ -1223,8 +1329,12 @@ function openHabitForm(id){
     document.getElementById('f_increment').value = '';
     document.getElementById('f_auto').classList.remove('on');
     document.getElementById('f_reminder').value = '';
+    document.getElementById('f_category').value = '';
     selectedIcon = ICONS[5]; selectedColor = COLORS[0];
+    reminderRepeat = 'daily'; reminderCustomDays = [];
   }
+  setReminderRepeat(reminderRepeat);
+  onReminderTimeChange();
   buildPickers();
   overlay.classList.add('show');
 }
@@ -1263,14 +1373,24 @@ function saveHabitForm(){
   const increment = parseFloat(document.getElementById('f_increment').value) || 0;
   const auto = document.getElementById('f_auto').classList.contains('on');
   const reminder = document.getElementById('f_reminder').value || null;
+  const categoryId = document.getElementById('f_category').value || null;
 
   if(!name || isNaN(start)){ showToast('Completa al menos el nombre y el valor inicial'); return; }
+
+  let reminderDays = null;
+  if(reminder){
+    if(reminderRepeat==='weekdays') reminderDays = [1,2,3,4,5];
+    else if(reminderRepeat==='custom'){
+      if(reminderCustomDays.length===0){ showToast('Elige al menos un día para el recordatorio personalizado'); return; }
+      reminderDays = [...reminderCustomDays].sort();
+    } else reminderDays = null; // daily
+  }
 
   if(editingHabitId){
     const h = state.habits.find(x=>x.id===editingHabitId);
     h.name = name; h.unit = unit.label; h.unitId = unit.id; h.unitType = unit.type; h.increment = increment;
-    h.autoIncrement = auto; h.reminderTime = reminder;
-    h.icon = selectedIcon; h.color = selectedColor;
+    h.autoIncrement = auto; h.reminderTime = reminder; h.reminderDays = reminderDays;
+    h.icon = selectedIcon; h.color = selectedColor; h.categoryId = categoryId;
   } else {
     const id = 'h_'+Date.now();
     state.habits.push({
@@ -1279,8 +1399,10 @@ function saveHabitForm(){
       increment,
       autoIncrement: auto,
       reminderTime: reminder,
+      reminderDays,
       icon: selectedIcon,
       color: selectedColor,
+      categoryId,
       createdAt: todayStr(),
       currentTarget: start,
       appliedWeekIndex: 0,
@@ -1315,7 +1437,7 @@ function urlBase64ToUint8Array(base64String){
 function buildReminders(){
   return state.habits.filter(h=>h.reminderTime).map(h=>({
     habitId: h.id, name: h.name, unit: h.unit, target: h.currentTarget,
-    icon: h.icon, time: h.reminderTime
+    icon: h.icon, time: h.reminderTime, days: h.reminderDays || null
   }));
 }
 async function registerSW(){
@@ -1538,7 +1660,7 @@ function dismissNotif(id){
 function clearAllNotifs(){
   const items = buildNotifItems();
   pruneDismissed();
-  const allIds = [...items.streaks, ...items.missed, ...items.forgotten, ...items.suggestions].map(x=>x.id);
+  const allIds = [...items.streaks, ...items.missed, ...items.forgotten, ...items.suggestions, ...items.reminders].map(x=>x.id);
   state.dismissed.ids = Array.from(new Set([...state.dismissed.ids, ...allIds]));
   saveState();
   renderNotificaciones();
@@ -1554,7 +1676,44 @@ function buildNotifItems(){
   const forgotten = state.habits.map(h=>({ id:`forgotten_${h.id}_${t}`, h, days:daysSinceLastProgress(h) }))
     .filter(x=>x.days>=3).sort((a,b)=>b.days-a.days);
   const suggestions = generateRecommendations().map((r,i)=>({ id:`sugg_${i}_${t}`, ...r }));
-  return { streaks, missed, forgotten, suggestions };
+  const reminders = state.habits.filter(h=>h.reminderTime).map(h=>({ id:`remind_${h.id}_${t}`, h }));
+  return { streaks, missed, forgotten, suggestions, reminders };
+}
+// Aggregate stats per category catalog entry (plus "sin categoría"), used by the
+// insights section at the top of Avisos.
+function computeCategoryInsights(){
+  const t = todayStr();
+  const byCat = {};
+  state.habits.forEach(h=>{
+    const key = h.categoryId || 'none';
+    (byCat[key] = byCat[key] || []).push(h);
+  });
+  return Object.keys(byCat).map(key=>{
+    const cat = categoryDef(key) || { id:'none', icon:'📌', label:'Sin categoría' };
+    const habits = byCat[key];
+    let doneDays = 0, totalDays = 0, streakSum = 0;
+    habits.forEach(h=>{
+      const span = Math.min(30, Math.max(1, daysBetween(h.createdAt, t)+1));
+      for(let i=0;i<span;i++){
+        const d = addDays(t, -i);
+        if(d<h.createdAt) continue;
+        totalDays++;
+        if(h.logs[d] && h.logs[d].done) doneDays++;
+      }
+      streakSum += getStreak(h);
+    });
+    return { cat, count:habits.length, avgStreak:round1(streakSum/habits.length), rate: totalDays ? Math.round((doneDays/totalDays)*100) : 0 };
+  }).sort((a,b)=> b.rate - a.rate);
+}
+function renderCategoryInsightsHtml(){
+  const insights = computeCategoryInsights();
+  if(!insights.length) return '';
+  return '<div class="section-label">Categorías</div>' + insights.map(x=>`
+    <div class="cat-card">
+      <div class="cat-head"><span class="cat-ic">${x.cat.icon}</span><span class="cat-name">${esc(x.cat.label)}</span><span class="cat-count">${x.count} hábito${x.count===1?'':'s'}</span></div>
+      <div class="cat-bar"><div class="cat-bar-fill" style="width:${x.rate}%"></div></div>
+      <div class="cat-meta">${x.rate}% cumplimiento (30d) · racha prom. ${x.avgStreak}</div>
+    </div>`).join('');
 }
 function updateNotifBadge(){
   const dot = document.getElementById('notifDot');
@@ -1575,8 +1734,10 @@ function renderNotificaciones(){
   const pendingToday = raw.missed.filter(x=>!isDismissed(x.id));
   const forgotten = raw.forgotten.filter(x=>!isDismissed(x.id));
   const recs = raw.suggestions.filter(x=>!isDismissed(x.id));
+  const reminderItems = raw.reminders.filter(x=>!isDismissed(x.id));
 
-  let html = '<div class="section-label">Rachas</div>';
+  let html = renderCategoryInsightsHtml();
+  html += '<div class="section-label">Rachas</div>';
   if(raw.streaks.length===0){
     html += `<div class="notif-card"><p>Todavía no tienes rachas activas. Marca un hábito hoy para empezar una.</p></div>`;
   } else if(streakItems.length===0){
@@ -1633,6 +1794,20 @@ function renderNotificaciones(){
         <div class="nc-head"><span>${icon}</span>${esc(title)}</div>
         <p>${esc(text)}</p>
         ${action ? `<div class="btn primary nc-action" onclick="${action}">${esc(actionLabel)}</div>` : ''}
+      </div>`).join('');
+  }
+
+  html += '<div class="section-label">Recordatorios</div>';
+  if(raw.reminders.length===0){
+    html += `<div class="notif-card"><p>No tienes recordatorios activos. Configúralos al crear o editar un hábito.</p></div>`;
+  } else if(reminderItems.length===0){
+    html += `<div class="notif-card"><p>Ya revisaste tus recordatorios de hoy.</p></div>`;
+  } else {
+    html += reminderItems.map(({id,h})=>`
+      <div class="notif-card reminder">
+        ${dismissBtn(id)}
+        <div class="nc-head"><span>${h.icon}</span>${esc(h.name)}</div>
+        <p>${reminderSummary(h)}</p>
       </div>`).join('');
   }
 
