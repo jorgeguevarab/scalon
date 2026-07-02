@@ -252,6 +252,39 @@
   .diary-entry{ background:var(--paper-alt); border:1px solid var(--rule); border-radius:10px; padding:10px 12px; }
   .diary-date{ font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:var(--ink-500); text-transform:uppercase; margin-bottom:4px; }
   .diary-note{ font-size:13.5px; line-height:1.45; }
+
+  /* ---------- Notifications ---------- */
+  .notif-card{ background:var(--paper-alt); border:1px solid var(--rule); border-left:3px solid var(--rule); border-radius:var(--radius); padding:14px 16px; margin-bottom:12px; }
+  .notif-card .nc-head{display:flex; align-items:center; gap:8px; font-family:'Fraunces',serif; font-weight:600; font-size:15px; margin-bottom:4px;}
+  .notif-card p{font-size:13px; color:var(--ink-500); line-height:1.5; margin:0;}
+  .notif-card.streak{border-left-color:var(--amber);}
+  .notif-card.missed{border-left-color:var(--danger);}
+  .notif-card.forgotten{border-left-color:var(--ink-500);}
+  .notif-card.suggestion{border-left-color:var(--moss);}
+  .notif-card .nc-action{margin-top:10px; display:inline-block; padding:8px 14px;}
+
+  nav.bottom button .ic{position:relative;}
+  nav.bottom .dot{ position:absolute; top:-2px; right:-5px; width:8px; height:8px; border-radius:50%; background:var(--danger); border:1.5px solid var(--glass-bar-bg); display:none; }
+  nav.bottom .dot.show{display:block;}
+
+  /* ---------- Charts ---------- */
+  .chart-wrap{margin-bottom:20px;}
+  .chart-svg{width:100%; height:104px; display:block;}
+  .chart-caption{font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:var(--ink-500); margin-bottom:6px;}
+
+  /* ---------- Global calendar ---------- */
+  .gcal-cell{ aspect-ratio:1; border-radius:7px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1px; font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--ink-700); border:1px solid var(--rule); cursor:pointer; background:var(--paper); }
+  .gcal-cell.blank{border:none; background:none; cursor:default;}
+  .gcal-cell.future{opacity:.4; cursor:default;}
+  .gcal-cell.selected{outline:2px solid var(--ink-900); outline-offset:1px;}
+  .gcal-cell .gr{font-size:8px; color:var(--ink-500);}
+  .cal-day-label{font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--ink-500); text-transform:capitalize; margin:22px 0 10px;}
+  .cal-day-list{display:flex; flex-direction:column; gap:9px;}
+  .cal-day-item{display:flex; align-items:center; gap:10px; padding:11px 12px; background:var(--paper-alt); border:1px solid var(--rule); border-radius:12px;}
+  .cal-day-item .cdi-icon{width:32px; height:32px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:15px; background:var(--hc,var(--amber)); flex-shrink:0;}
+  .cal-day-item .cdi-name{font-family:'Fraunces',serif; font-weight:600; font-size:14.5px;}
+  .cal-day-item .cdi-meta{font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--ink-500); margin-top:2px;}
+  .cal-day-item .cdi-status{margin-left:auto; font-size:17px;}
 </style>
 </head>
 <body>
@@ -270,12 +303,30 @@
 
     <section class="view" id="view-habitos">
       <div class="section-label">Tus hábitos</div>
+      <div id="habitosCharts"></div>
       <div id="habitosList"></div>
     </section>
 
     <section class="view" id="view-detalle">
       <div class="back-row" onclick="goTo('habitos')"><span class="chev">‹</span><span class="txt">Hábitos</span></div>
       <div id="detalleContent"></div>
+    </section>
+
+    <section class="view" id="view-calendario">
+      <div class="section-label">Calendario</div>
+      <div class="cal-nav">
+        <button onclick="globalCalMonthOffset--; renderCalendario();">‹</button>
+        <div class="lbl" id="gcalLabel"></div>
+        <button onclick="globalCalMonthOffset++; renderCalendario();">›</button>
+      </div>
+      <div class="cal-grid" id="gcalGrid"></div>
+      <div class="cal-day-label" id="calDayLabel"></div>
+      <div class="cal-day-list" id="calDayList"></div>
+    </section>
+
+    <section class="view" id="view-notificaciones">
+      <div class="section-label">Notificaciones</div>
+      <div id="notifContent"></div>
     </section>
 
     <section class="view" id="view-ajustes">
@@ -321,7 +372,9 @@
 
   <nav class="bottom">
     <button class="active" data-view="hoy" onclick="goTo('hoy')"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18z"/></svg></span>Hoy</button>
+    <button data-view="calendario" onclick="goTo('calendario')"><span class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="16" rx="2"/><line x1="16" y1="2.5" x2="16" y2="6.5"/><line x1="8" y1="2.5" x2="8" y2="6.5"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>Calendario</button>
     <button data-view="habitos" onclick="goTo('habitos')"><span class="ic"><svg viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></svg></span>Hábitos</button>
+    <button data-view="notificaciones" onclick="goTo('notificaciones')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 6.5-2.5 8.5-2.5 8.5h17S18 14.5 18 8z"/><path d="M13.7 20a2 2 0 0 1-3.4 0"/></svg><span class="dot" id="notifDot"></span></span>Avisos</button>
     <button data-view="ajustes" onclick="goTo('ajustes')"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>Ajustes</button>
   </nav>
 </div>
@@ -434,6 +487,8 @@ let focusHabitId = null;
 let wakeLock = null;
 let authState = { authenticated:false, email:null };
 let syncDebounceTimer = null;
+let globalCalMonthOffset = 0;
+let globalCalSelectedDate = null;
 
 migrateUnits();
 
@@ -461,6 +516,7 @@ function saveState(){
     clearTimeout(syncDebounceTimer);
     syncDebounceTimer = setTimeout(pushServerState, 1500);
   }
+  updateNotifBadge();
 }
 
 // Backfills habits/logs created before the fixed unit catalog and per-session tracking existed.
@@ -546,6 +602,8 @@ function goTo(view){
   document.getElementById('fabAdd').style.display = (view==='habitos') ? 'flex' : 'none';
   if(view==='hoy') renderHoy();
   if(view==='habitos') renderHabitos();
+  if(view==='calendario') renderCalendario();
+  if(view==='notificaciones') renderNotificaciones();
   if(view==='ajustes') renderAjustes();
   window.scrollTo(0,0);
 }
@@ -767,10 +825,13 @@ function stopTimerFromFocus(){
 /* ---------------- Render: Habitos list ---------------- */
 function renderHabitos(){
   const list = document.getElementById('habitosList');
+  const chartsWrap = document.getElementById('habitosCharts');
   if(state.habits.length===0){
+    chartsWrap.innerHTML = '';
     list.innerHTML = `<div class="empty-state"><div class="display">Sin hábitos aún</div><p>Toca el botón + para crear el primero.</p></div>`;
     return;
   }
+  chartsWrap.innerHTML = renderTrendCharts();
   list.innerHTML = state.habits.map(h=>{
     const streak = getStreak(h);
     return `
@@ -783,6 +844,72 @@ function renderHabitos(){
       <div class="arrow">›</div>
     </div>`;
   }).join('');
+}
+
+/* ---------------- Trend charts (inline SVG, no external lib) ---------------- */
+function weeklyCompletionSeries(weeks){
+  const t = todayStr();
+  const series = [];
+  for(let w=weeks-1; w>=0; w--){
+    const weekEnd = addDays(t, -7*w);
+    let done=0, total=0;
+    for(let i=0;i<7;i++){
+      const d = addDays(weekEnd, -i);
+      if(d>t) continue;
+      state.habits.forEach(h=>{
+        if(d>=h.createdAt){ total++; if(h.logs[d] && h.logs[d].done) done++; }
+      });
+    }
+    series.push({ label:'', ratio: total ? done/total : 0 });
+  }
+  return series;
+}
+function weekdayCompletionSeries(){
+  const names = ['L','M','X','J','V','S','D'];
+  const buckets = Array.from({length:7}, ()=>({done:0,total:0}));
+  state.habits.forEach(h=>{
+    Object.keys(h.logs).forEach(d=>{
+      if(d>=h.createdAt && d<=todayStr()){
+        const dow = (new Date(d+'T00:00:00').getDay()+6)%7;
+        buckets[dow].total++;
+        if(h.logs[d].done) buckets[dow].done++;
+      }
+    });
+  });
+  return buckets.map((b,i)=>({ label:names[i], ratio: b.total ? b.done/b.total : 0 }));
+}
+function svgBarChart(values, opts){
+  opts = opts||{};
+  const w = 300, h = 100, pad = 4;
+  const n = values.length;
+  const bw = (w - pad*(n+1))/n;
+  const bars = values.map((v,i)=>{
+    const barH = Math.max(2, v.ratio*(h-16));
+    const x = pad + i*(bw+pad);
+    const y = h-16-barH;
+    const label = opts.showLabels ? `<text x="${(x+bw/2).toFixed(1)}" y="${h-4}" font-size="8" text-anchor="middle" style="fill:var(--ink-500); font-family:'IBM Plex Mono',monospace;">${esc(v.label)}</text>` : '';
+    return `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${bw.toFixed(1)}" height="${barH.toFixed(1)}" rx="3" style="fill:${opts.color||'var(--amber)'}"/>${label}`;
+  }).join('');
+  return `<svg class="chart-svg" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">${bars}</svg>`;
+}
+function renderTrendCharts(){
+  const hasLogs = state.habits.some(h=>Object.keys(h.logs).length>0);
+  if(!hasLogs) return '';
+  const weekly = weeklyCompletionSeries(8);
+  const weekday = weekdayCompletionSeries();
+  const avgWeekly = Math.round((weekly.reduce((s,v)=>s+v.ratio,0)/weekly.length)*100);
+  const avgWeekday = Math.round((weekday.reduce((s,v)=>s+v.ratio,0)/weekday.length)*100);
+  return `
+    <div class="section-label">Tendencias</div>
+    <div class="chart-wrap">
+      <div class="chart-caption">Cumplimiento semanal · últimas 8 semanas · promedio ${avgWeekly}%</div>
+      ${svgBarChart(weekly, {color:'var(--amber)', showLabels:false})}
+    </div>
+    <div class="chart-wrap">
+      <div class="chart-caption">Cumplimiento por día de la semana · promedio ${avgWeekday}%</div>
+      ${svgBarChart(weekday, {color:'var(--moss)', showLabels:true})}
+    </div>
+  `;
 }
 
 /* ---------------- Detail: stats + staircase + calendar ---------------- */
@@ -893,6 +1020,75 @@ function renderCalendar(h){
     html += `<div class="${cls}">${day}</div>`;
   }
   document.getElementById('calGrid').innerHTML = html;
+}
+
+/* ---------------- Global calendar: pick a day, see every habit that day ---------------- */
+function habitsOnDate(dateStr){ return state.habits.filter(h=>h.createdAt<=dateStr); }
+function targetForWeek(h, wIdx){
+  const applicable = h.weekHistory.filter(w=>w.week<=wIdx);
+  if(!applicable.length) return h.startValue;
+  return applicable.reduce((a,b)=> b.week>a.week ? b : a).value;
+}
+function renderCalendario(){
+  if(!globalCalSelectedDate) globalCalSelectedDate = todayStr();
+  const base = new Date();
+  base.setDate(1);
+  base.setMonth(base.getMonth()+globalCalMonthOffset);
+  const y = base.getFullYear(), m = base.getMonth();
+  document.getElementById('gcalLabel').textContent = base.toLocaleDateString('es-ES',{month:'long', year:'numeric'});
+
+  const firstDow = (new Date(y,m,1).getDay()+6)%7;
+  const daysInMonth = new Date(y,m+1,0).getDate();
+  const t = todayStr();
+
+  let html = DOWS.map(d=>`<div class="cal-dow">${d}</div>`).join('');
+  for(let i=0;i<firstDow;i++) html += `<div class="gcal-cell blank"></div>`;
+  for(let day=1; day<=daysInMonth; day++){
+    const dStr = `${y}-${String(m+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+    const isFuture = dStr > t;
+    let cls = 'gcal-cell';
+    if(isFuture) cls += ' future';
+    if(dStr === globalCalSelectedDate) cls += ' selected';
+    let bg = '', ratioLabel = '';
+    if(!isFuture){
+      const habits = habitsOnDate(dStr);
+      if(habits.length){
+        const done = habits.filter(h=>h.logs[dStr] && h.logs[dStr].done).length;
+        const ratio = done/habits.length;
+        bg = ` style="background:color-mix(in srgb, var(--moss) ${Math.round(ratio*65)}%, var(--paper))"`;
+        ratioLabel = `<div class="gr">${done}/${habits.length}</div>`;
+      }
+    }
+    const click = isFuture ? '' : ` onclick="selectCalDay('${dStr}')"`;
+    html += `<div class="${cls}"${bg}${click}><div>${day}</div>${ratioLabel}</div>`;
+  }
+  document.getElementById('gcalGrid').innerHTML = html;
+  renderCalDayList();
+}
+function selectCalDay(dStr){ globalCalSelectedDate = dStr; renderCalendario(); }
+function renderCalDayList(){
+  const dStr = globalCalSelectedDate;
+  document.getElementById('calDayLabel').textContent =
+    new Date(dStr+'T00:00:00').toLocaleDateString('es-ES',{weekday:'long', day:'numeric', month:'long'});
+  const habits = habitsOnDate(dStr);
+  const list = document.getElementById('calDayList');
+  if(!habits.length){
+    list.innerHTML = `<div class="empty-state" style="padding:30px 10px;"><p>Ningún hábito existía todavía en esta fecha.</p></div>`;
+    return;
+  }
+  list.innerHTML = habits.map(h=>{
+    const log = h.logs[dStr] || { value:0, done:false };
+    const wIdx = weekIndexFor(h, dStr);
+    const target = targetForWeek(h, wIdx);
+    return `<div class="cal-day-item">
+      <div class="cdi-icon" style="--hc:${h.color}">${h.icon}</div>
+      <div>
+        <div class="cdi-name">${esc(h.name)}</div>
+        <div class="cdi-meta">${log.value||0} / ${target} ${esc(h.unit)}</div>
+      </div>
+      <div class="cdi-status">${log.done?'✅':'—'}</div>
+    </div>`;
+  }).join('');
 }
 
 /* ---------------- Habit form (create/edit) ---------------- */
@@ -1192,6 +1388,176 @@ function importData(){
     }catch(err){ showToast('El archivo no es un respaldo válido'); }
   };
   reader.readAsText(file);
+}
+
+/* ---------------- Notifications area ----------------
+   Everything here is computed live from local state on each render — there is
+   no separate notification log to persist, mirroring the app's local-first
+   design (see api/ for the one thing that does touch a server: reminders). */
+function daysSinceLastProgress(h){
+  const dates = Object.keys(h.logs).filter(d=>h.logs[d].value>0 || h.logs[d].done).sort();
+  if(!dates.length) return daysBetween(h.createdAt, todayStr());
+  return daysBetween(dates[dates.length-1], todayStr());
+}
+function updateNotifBadge(){
+  const dot = document.getElementById('notifDot');
+  if(!dot) return;
+  const t = todayStr();
+  const pending = state.habits.some(h=>!(h.logs[t] && h.logs[t].done));
+  const forgotten = state.habits.some(h=>daysSinceLastProgress(h)>=3);
+  dot.classList.toggle('show', state.habits.length>0 && (pending || forgotten));
+}
+function renderNotificaciones(){
+  const wrap = document.getElementById('notifContent');
+  if(!state.habits.length){
+    wrap.innerHTML = `<div class="empty-state"><div class="display">Nada que avisar todavía</div><p>Crea tu primer hábito para empezar a recibir rachas, avisos y sugerencias aquí.</p></div>`;
+    return;
+  }
+  const t = todayStr();
+  const streakItems = state.habits.filter(h=>getStreak(h)>0)
+    .map(h=>({h, streak:getStreak(h)})).sort((a,b)=>b.streak-a.streak);
+  const pendingToday = state.habits.filter(h=>!(h.logs[t] && h.logs[t].done));
+  const forgotten = state.habits.map(h=>({h, days:daysSinceLastProgress(h)}))
+    .filter(x=>x.days>=3).sort((a,b)=>b.days-a.days);
+  const recs = generateRecommendations();
+
+  let html = '<div class="section-label">Rachas</div>';
+  if(streakItems.length){
+    html += streakItems.slice(0,6).map(({h,streak})=>{
+      const next = MILESTONES.find(m=>m>streak);
+      const msg = next ? `Te faltan ${next-streak} día(s) para ${MEDAL[next]} ${next}.` : '¡Racha máxima alcanzada!';
+      return `<div class="notif-card streak">
+        <div class="nc-head"><span>🔥</span>${esc(h.name)} · ${streak} día(s)</div>
+        <p>${msg}</p>
+      </div>`;
+    }).join('');
+  } else {
+    html += `<div class="notif-card"><p>Todavía no tienes rachas activas. Marca un hábito hoy para empezar una.</p></div>`;
+  }
+
+  html += '<div class="section-label">Sin marcar hoy</div>';
+  if(pendingToday.length){
+    html += pendingToday.map(h=>`
+      <div class="notif-card missed">
+        <div class="nc-head"><span>${h.icon}</span>${esc(h.name)}</div>
+        <p>Todavía no registras nada hoy. Meta: ${h.currentTarget} ${esc(h.unit)}.</p>
+      </div>`).join('');
+  } else {
+    html += `<div class="notif-card"><p>Completaste todos tus hábitos de hoy. 🎉</p></div>`;
+  }
+
+  html += '<div class="section-label">Hábitos olvidados</div>';
+  if(forgotten.length){
+    html += forgotten.map(({h,days})=>`
+      <div class="notif-card forgotten">
+        <div class="nc-head"><span>${h.icon}</span>${esc(h.name)}</div>
+        <p>Sin progreso hace ${days} días. ¿Lo retomamos?</p>
+      </div>`).join('');
+  } else {
+    html += `<div class="notif-card"><p>Ningún hábito lleva más de 2 días sin actividad.</p></div>`;
+  }
+
+  html += '<div class="section-label">Sugerencias</div>';
+  if(recs.length){
+    html += recs.map(r=>`
+      <div class="notif-card suggestion">
+        <div class="nc-head"><span>${r.icon}</span>${esc(r.title)}</div>
+        <p>${esc(r.text)}</p>
+        ${r.action ? `<div class="btn primary nc-action" onclick="${r.action}">${esc(r.actionLabel)}</div>` : ''}
+      </div>`).join('');
+  } else {
+    html += `<div class="notif-card"><p>Vas bien — no tenemos sugerencias por ahora.</p></div>`;
+  }
+
+  wrap.innerHTML = html;
+}
+
+/* ---------------- Recommendation engine ----------------
+   Rule-based, driven entirely by the habits and logs already in local
+   storage: no fixed catalog of tips, everything reacts to actual data. */
+const HABIT_CATEGORY_SUGGESTIONS = [
+  { icon:'💧', name:'Beber agua', unitId:'glasses', keywords:['agua','hidrat'], text:'No tienes ningún hábito de hidratación. Uno pequeño puede complementar bien los que ya tienes.' },
+  { icon:'🧘', name:'Meditar', unitId:'minutes', keywords:['medit','mindful','respira'], text:'Ninguno de tus hábitos trabaja la mente. Unos minutos de calma pueden ayudarte a sostener el resto de tus rachas.' },
+  { icon:'📖', name:'Leer', unitId:'pages', keywords:['lee','lectura','libro'], text:'No tienes un hábito de lectura. Unas páginas al día suman mucho con el tiempo.' },
+  { icon:'🏃', name:'Ejercicio', unitId:'minutes', keywords:['ejercicio','correr','gym','entren','deporte'], text:'No tienes ningún hábito de movimiento. Empezar con pocos minutos al día es suficiente.' },
+];
+function habitCategoryPresent(s){
+  return state.habits.some(h=>h.icon===s.icon || s.keywords.some(k=>h.name.toLowerCase().includes(k)));
+}
+function computeWeakestWeekday(){
+  const buckets = Array.from({length:7}, ()=>({done:0,total:0}));
+  state.habits.forEach(h=>{
+    Object.keys(h.logs).forEach(d=>{
+      if(d>=h.createdAt && d<=todayStr()){
+        const dow = (new Date(d+'T00:00:00').getDay()+6)%7;
+        buckets[dow].total++;
+        if(h.logs[d].done) buckets[dow].done++;
+      }
+    });
+  });
+  if(buckets.reduce((s,b)=>s+b.total,0) < 14) return null;
+  const valid = buckets.map((b,i)=>({r: b.total>=2 ? b.done/b.total : null, i})).filter(x=>x.r!==null);
+  if(valid.length<5) return null;
+  const avg = valid.reduce((s,x)=>s+x.r,0)/valid.length;
+  const worst = valid.reduce((a,b)=> b.r<a.r ? b : a);
+  if(avg - worst.r < 0.2) return null;
+  const names = ['lunes','martes','miércoles','jueves','viernes','sábado','domingo'];
+  return { icon:'📅', title:`Los ${names[worst.i]} te cuestan más`,
+    text:'Tu cumplimiento ese día está por debajo de tu promedio semanal. Prepara con anticipación tus hábitos para ese día.' };
+}
+function generateRecommendations(){
+  const recs = [];
+  const t = todayStr();
+  const last7 = [...Array(7)].map((_,i)=>addDays(t,-i));
+
+  state.habits.forEach(h=>{
+    const recentLogs = last7.map(d=>h.logs[d]).filter(Boolean);
+    if(recentLogs.length>=4 && h.currentTarget>0){
+      const avgPct = recentLogs.reduce((s,l)=>s+Math.min(2, l.value/h.currentTarget),0)/recentLogs.length;
+      if(avgPct >= 1.3){
+        recs.push({ icon:'📈', title:`Vas muy adelantado en ${h.name}`,
+          text:`En los últimos días superas la meta con margen amplio. Considera subir el incremento semanal (ahora +${h.increment} ${h.unit}).` });
+      } else if(avgPct>0 && avgPct<=0.4 && recentLogs.length>=5){
+        recs.push({ icon:'📉', title:`${h.name} se ha sentido difícil`,
+          text:`Llevas varios días muy por debajo de la meta de ${h.currentTarget} ${h.unit}. Bajar el incremento o el objetivo actual puede ayudarte a sostener la racha.` });
+      }
+    }
+    if(!h.reminderTime){
+      const totalDays = Math.max(1, daysBetween(h.createdAt, t));
+      const doneDays = Object.values(h.logs).filter(l=>l.done).length;
+      if(totalDays>=5 && doneDays/totalDays < 0.5){
+        recs.push({ icon:'⏰', title:`Prueba un recordatorio para ${h.name}`,
+          text:'Has cumplido menos de la mitad de los días desde que empezaste. Un recordatorio a hora fija puede subir tu constancia.' });
+      }
+    }
+    if(getStreak(h)===0 && (h.bestStreak||0)>=7){
+      recs.push({ icon:'🔁', title:`Retoma ${h.name}`,
+        text:`Antes llegaste a una racha de ${h.bestStreak} días. Un solo registro hoy vuelve a ponerla en marcha.` });
+    }
+  });
+
+  if(state.habits.length>0 && state.habits.length<6){
+    HABIT_CATEGORY_SUGGESTIONS.forEach(s=>{
+      if(!habitCategoryPresent(s)){
+        recs.push({ icon:s.icon, title:`Agrega un hábito de ${s.name.toLowerCase()}`, text:s.text,
+          action:`prefillHabitSuggestion('${s.icon}','${s.name.replace(/'/g,"\\'")}','${s.unitId}')`,
+          actionLabel:'Crear hábito' });
+      }
+    });
+  }
+
+  const weekdayInsight = computeWeakestWeekday();
+  if(weekdayInsight) recs.push(weekdayInsight);
+
+  return recs.slice(0,6);
+}
+function prefillHabitSuggestion(icon, name, unitId){
+  goTo('habitos');
+  openHabitForm();
+  document.getElementById('f_name').value = name;
+  document.getElementById('f_unit').value = unitId;
+  selectedIcon = icon;
+  buildPickers();
 }
 
 /* ---------------- Reminders ----------------
