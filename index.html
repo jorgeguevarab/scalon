@@ -254,7 +254,7 @@
   .diary-note{ font-size:13.5px; line-height:1.45; }
 
   /* ---------- Notifications ---------- */
-  .notif-card{ background:var(--paper-alt); border:1px solid var(--rule); border-left:3px solid var(--rule); border-radius:var(--radius); padding:14px 16px; margin-bottom:12px; }
+  .notif-card{ position:relative; background:var(--paper-alt); border:1px solid var(--rule); border-left:3px solid var(--rule); border-radius:var(--radius); padding:14px 38px 14px 16px; margin-bottom:12px; }
   .notif-card .nc-head{display:flex; align-items:center; gap:8px; font-family:'Fraunces',serif; font-weight:600; font-size:15px; margin-bottom:4px;}
   .notif-card p{font-size:13px; color:var(--ink-500); line-height:1.5; margin:0;}
   .notif-card.streak{border-left-color:var(--amber);}
@@ -262,6 +262,35 @@
   .notif-card.forgotten{border-left-color:var(--ink-500);}
   .notif-card.suggestion{border-left-color:var(--moss);}
   .notif-card .nc-action{margin-top:10px; display:inline-block; padding:8px 14px;}
+  .notif-dismiss{ position:absolute; top:8px; right:8px; width:24px; height:24px; border-radius:50%; border:none; background:transparent; color:var(--ink-500); font-size:16px; line-height:1; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+  .notif-dismiss:active{background:var(--rule);}
+
+  .hoy-head{display:flex; justify-content:space-between; align-items:center;}
+  .clear-all-link{font-size:11px; color:var(--amber); cursor:pointer;}
+  .clear-all-link:active{opacity:.6;}
+  .layout-toggle{display:flex; gap:4px;}
+  .lt-btn{width:30px; height:30px; border-radius:8px; border:1px solid var(--rule); background:var(--paper-alt); color:var(--ink-500); display:flex; align-items:center; justify-content:center; cursor:pointer;}
+  .lt-btn svg{width:15px; height:15px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round;}
+  .lt-btn.active{background:var(--ink-900); color:var(--paper); border-color:var(--ink-900);}
+
+  .hoy-grid{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+  .hoy-grid .habit-card{margin-bottom:0; padding:12px 12px 10px;}
+  .hoy-grid .hc-name{font-size:14px; line-height:1.2;}
+  .hoy-grid .hc-week{font-size:10px; flex-wrap:wrap;}
+  .hoy-grid .hc-top{flex-wrap:wrap;}
+  .hoy-grid .hc-icon{width:28px; height:28px; font-size:14px; border-radius:8px;}
+  .hoy-grid .hc-target{font-size:15px;}
+  .hoy-grid .hc-target span{font-size:10px;}
+  .hoy-grid .hc-controls{margin-top:10px; gap:6px;}
+  .hoy-grid .hc-input{padding:6px 8px;}
+  .hoy-grid .hc-input input, .hoy-grid .hc-today-val{font-size:13px;}
+  .hoy-grid .check-btn{width:32px; height:32px; font-size:15px; flex-shrink:0;}
+  .hoy-grid .timer-row{gap:6px; margin-top:8px; padding-top:8px;}
+  .hoy-grid .timer-display{font-size:15px;}
+  .hoy-grid .timer-btn{padding:7px 9px; font-size:11px;}
+  .hoy-grid .rating-badge{font-size:10.5px; padding:6px 9px;}
+  .hoy-grid .bump-badge{font-size:11px; padding:7px 9px; flex-wrap:wrap;}
+  @media (max-width:380px){ .hoy-grid{grid-template-columns:1fr;} }
 
   nav.bottom button .ic{position:relative;}
   nav.bottom .dot{ position:absolute; top:-2px; right:-5px; width:8px; height:8px; border-radius:50%; background:var(--danger); border:1.5px solid var(--glass-bar-bg); display:none; }
@@ -297,7 +326,13 @@
 
   <main>
     <section class="view active" id="view-hoy">
-      <div class="section-label">Hoy</div>
+      <div class="section-label hoy-head">
+        <span>Hoy</span>
+        <span class="layout-toggle">
+          <button class="lt-btn" data-layout="stack" onclick="setHoyLayout('stack')" aria-label="Vista en lista"><svg viewBox="0 0 24 24"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg></button>
+          <button class="lt-btn" data-layout="grid" onclick="setHoyLayout('grid')" aria-label="Vista en cuadrícula"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1.2"/><rect x="13" y="4" width="7" height="7" rx="1.2"/><rect x="4" y="13" width="7" height="7" rx="1.2"/><rect x="13" y="13" width="7" height="7" rx="1.2"/></svg></button>
+        </span>
+      </div>
       <div id="hoyList"></div>
     </section>
 
@@ -325,7 +360,10 @@
     </section>
 
     <section class="view" id="view-notificaciones">
-      <div class="section-label">Notificaciones</div>
+      <div class="section-label hoy-head">
+        <span>Notificaciones</span>
+        <span class="clear-all-link" onclick="clearAllNotifs()">Limpiar todo</span>
+      </div>
       <div id="notifContent"></div>
     </section>
 
@@ -452,6 +490,12 @@ const ICONS = ['🏃','📖','✍️','🧘','💧','🎯','🎸','🧠','🎨',
 const COLORS = ['#E2933C','#52795F','#B5533F','#4C6B8A','#7A5C99','#2C8C8C'];
 const MILESTONES = [3,7,14,30,60,100,200,365];
 const MEDAL = {3:'🔥',7:'⭐',14:'🥉',30:'🥈',60:'🥇',100:'🏆',200:'💎',365:'👑'};
+const HABIT_CATEGORY_SUGGESTIONS = [
+  { icon:'💧', name:'Beber agua', unitId:'glasses', keywords:['agua','hidrat'], text:'No tienes ningún hábito de hidratación. Uno pequeño puede complementar bien los que ya tienes.' },
+  { icon:'🧘', name:'Meditar', unitId:'minutes', keywords:['medit','mindful','respira'], text:'Ninguno de tus hábitos trabaja la mente. Unos minutos de calma pueden ayudarte a sostener el resto de tus rachas.' },
+  { icon:'📖', name:'Leer', unitId:'pages', keywords:['lee','lectura','libro'], text:'No tienes un hábito de lectura. Unas páginas al día suman mucho con el tiempo.' },
+  { icon:'🏃', name:'Ejercicio', unitId:'minutes', keywords:['ejercicio','correr','gym','entren','deporte'], text:'No tienes ningún hábito de movimiento. Empezar con pocos minutos al día es suficiente.' },
+];
 
 // Fixed catalog: time-type units are captured only via the timer; count-type
 // units are entered manually. Users can't invent arbitrary unmeasurable units.
@@ -609,9 +653,22 @@ function goTo(view){
 }
 
 /* ---------------- Render: Hoy ---------------- */
+function getHoyLayout(){ return (state.settings && state.settings.hoyLayout) || 'stack'; }
+function setHoyLayout(mode){
+  state.settings = state.settings || {};
+  state.settings.hoyLayout = mode;
+  saveState();
+  renderHoy();
+}
+function updateHoyLayoutButtons(){
+  const layout = getHoyLayout();
+  document.querySelectorAll('.lt-btn').forEach(b=>b.classList.toggle('active', b.dataset.layout===layout));
+}
 function renderHoy(){
   const list = document.getElementById('hoyList');
+  updateHoyLayoutButtons();
   if(state.habits.length===0){
+    list.className = '';
     list.innerHTML = `<div class="empty-state">
       <div class="display">Todavía no hay hábitos</div>
       <p>Define uno sencillo — por ejemplo 5 minutos de ejercicio — y ve subiendo el tiempo cada semana.</p>
@@ -619,6 +676,7 @@ function renderHoy(){
     </div>`;
     return;
   }
+  list.className = getHoyLayout()==='grid' ? 'hoy-grid' : '';
   const t = todayStr();
   list.innerHTML = state.habits.map(h=>{
     const log = h.logs[t] || { done:false, value:0, sessions:[] };
@@ -1393,80 +1451,126 @@ function importData(){
 /* ---------------- Notifications area ----------------
    Everything here is computed live from local state on each render — there is
    no separate notification log to persist, mirroring the app's local-first
-   design (see api/ for the one thing that does touch a server: reminders). */
+   design (see api/ for the one thing that does touch a server: reminders).
+   Dismissals are scoped to the current day: each item gets an id ending in
+   today's date, and the dismissed set resets whenever the date rolls over —
+   so "clearing" behaves like a daily inbox instead of hiding things forever. */
 function daysSinceLastProgress(h){
   const dates = Object.keys(h.logs).filter(d=>h.logs[d].value>0 || h.logs[d].done).sort();
   if(!dates.length) return daysBetween(h.createdAt, todayStr());
   return daysBetween(dates[dates.length-1], todayStr());
 }
+function pruneDismissed(){
+  if(!state.dismissed || state.dismissed.date !== todayStr()){
+    state.dismissed = { date: todayStr(), ids: [] };
+  }
+}
+function isDismissed(id){ pruneDismissed(); return state.dismissed.ids.includes(id); }
+function dismissNotif(id){
+  pruneDismissed();
+  if(!state.dismissed.ids.includes(id)) state.dismissed.ids.push(id);
+  saveState();
+  renderNotificaciones();
+}
+function clearAllNotifs(){
+  const items = buildNotifItems();
+  pruneDismissed();
+  const allIds = [...items.streaks, ...items.missed, ...items.forgotten, ...items.suggestions].map(x=>x.id);
+  state.dismissed.ids = Array.from(new Set([...state.dismissed.ids, ...allIds]));
+  saveState();
+  renderNotificaciones();
+  showToast('Notificaciones limpiadas');
+}
+function buildNotifItems(){
+  const t = todayStr();
+  const streaks = state.habits.filter(h=>getStreak(h)>0)
+    .map(h=>({ id:`streak_${h.id}_${t}`, h, streak:getStreak(h) }))
+    .sort((a,b)=>b.streak-a.streak);
+  const missed = state.habits.filter(h=>!(h.logs[t] && h.logs[t].done))
+    .map(h=>({ id:`missed_${h.id}_${t}`, h }));
+  const forgotten = state.habits.map(h=>({ id:`forgotten_${h.id}_${t}`, h, days:daysSinceLastProgress(h) }))
+    .filter(x=>x.days>=3).sort((a,b)=>b.days-a.days);
+  const suggestions = generateRecommendations().map((r,i)=>({ id:`sugg_${i}_${t}`, ...r }));
+  return { streaks, missed, forgotten, suggestions };
+}
 function updateNotifBadge(){
   const dot = document.getElementById('notifDot');
   if(!dot) return;
-  const t = todayStr();
-  const pending = state.habits.some(h=>!(h.logs[t] && h.logs[t].done));
-  const forgotten = state.habits.some(h=>daysSinceLastProgress(h)>=3);
-  dot.classList.toggle('show', state.habits.length>0 && (pending || forgotten));
+  const items = buildNotifItems();
+  const urgent = [...items.missed, ...items.forgotten].some(x=>!isDismissed(x.id));
+  dot.classList.toggle('show', state.habits.length>0 && urgent);
 }
+function dismissBtn(id){ return `<button class="notif-dismiss" onclick="dismissNotif('${id}')" aria-label="Descartar">×</button>`; }
 function renderNotificaciones(){
   const wrap = document.getElementById('notifContent');
   if(!state.habits.length){
     wrap.innerHTML = `<div class="empty-state"><div class="display">Nada que avisar todavía</div><p>Crea tu primer hábito para empezar a recibir rachas, avisos y sugerencias aquí.</p></div>`;
     return;
   }
-  const t = todayStr();
-  const streakItems = state.habits.filter(h=>getStreak(h)>0)
-    .map(h=>({h, streak:getStreak(h)})).sort((a,b)=>b.streak-a.streak);
-  const pendingToday = state.habits.filter(h=>!(h.logs[t] && h.logs[t].done));
-  const forgotten = state.habits.map(h=>({h, days:daysSinceLastProgress(h)}))
-    .filter(x=>x.days>=3).sort((a,b)=>b.days-a.days);
-  const recs = generateRecommendations();
+  const raw = buildNotifItems();
+  const streakItems = raw.streaks.filter(x=>!isDismissed(x.id));
+  const pendingToday = raw.missed.filter(x=>!isDismissed(x.id));
+  const forgotten = raw.forgotten.filter(x=>!isDismissed(x.id));
+  const recs = raw.suggestions.filter(x=>!isDismissed(x.id));
 
   let html = '<div class="section-label">Rachas</div>';
-  if(streakItems.length){
-    html += streakItems.slice(0,6).map(({h,streak})=>{
+  if(raw.streaks.length===0){
+    html += `<div class="notif-card"><p>Todavía no tienes rachas activas. Marca un hábito hoy para empezar una.</p></div>`;
+  } else if(streakItems.length===0){
+    html += `<div class="notif-card"><p>Ya revisaste tus rachas de hoy.</p></div>`;
+  } else {
+    html += streakItems.slice(0,6).map(({id,h,streak})=>{
       const next = MILESTONES.find(m=>m>streak);
       const msg = next ? `Te faltan ${next-streak} día(s) para ${MEDAL[next]} ${next}.` : '¡Racha máxima alcanzada!';
       return `<div class="notif-card streak">
+        ${dismissBtn(id)}
         <div class="nc-head"><span>🔥</span>${esc(h.name)} · ${streak} día(s)</div>
         <p>${msg}</p>
       </div>`;
     }).join('');
-  } else {
-    html += `<div class="notif-card"><p>Todavía no tienes rachas activas. Marca un hábito hoy para empezar una.</p></div>`;
   }
 
   html += '<div class="section-label">Sin marcar hoy</div>';
-  if(pendingToday.length){
-    html += pendingToday.map(h=>`
+  if(raw.missed.length===0){
+    html += `<div class="notif-card"><p>Completaste todos tus hábitos de hoy. 🎉</p></div>`;
+  } else if(pendingToday.length===0){
+    html += `<div class="notif-card"><p>Ya revisaste tus pendientes de hoy.</p></div>`;
+  } else {
+    html += pendingToday.map(({id,h})=>`
       <div class="notif-card missed">
+        ${dismissBtn(id)}
         <div class="nc-head"><span>${h.icon}</span>${esc(h.name)}</div>
         <p>Todavía no registras nada hoy. Meta: ${h.currentTarget} ${esc(h.unit)}.</p>
       </div>`).join('');
-  } else {
-    html += `<div class="notif-card"><p>Completaste todos tus hábitos de hoy. 🎉</p></div>`;
   }
 
   html += '<div class="section-label">Hábitos olvidados</div>';
-  if(forgotten.length){
-    html += forgotten.map(({h,days})=>`
+  if(raw.forgotten.length===0){
+    html += `<div class="notif-card"><p>Ningún hábito lleva más de 2 días sin actividad.</p></div>`;
+  } else if(forgotten.length===0){
+    html += `<div class="notif-card"><p>Ya revisaste tus hábitos olvidados de hoy.</p></div>`;
+  } else {
+    html += forgotten.map(({id,h,days})=>`
       <div class="notif-card forgotten">
+        ${dismissBtn(id)}
         <div class="nc-head"><span>${h.icon}</span>${esc(h.name)}</div>
         <p>Sin progreso hace ${days} días. ¿Lo retomamos?</p>
       </div>`).join('');
-  } else {
-    html += `<div class="notif-card"><p>Ningún hábito lleva más de 2 días sin actividad.</p></div>`;
   }
 
   html += '<div class="section-label">Sugerencias</div>';
-  if(recs.length){
-    html += recs.map(r=>`
-      <div class="notif-card suggestion">
-        <div class="nc-head"><span>${r.icon}</span>${esc(r.title)}</div>
-        <p>${esc(r.text)}</p>
-        ${r.action ? `<div class="btn primary nc-action" onclick="${r.action}">${esc(r.actionLabel)}</div>` : ''}
-      </div>`).join('');
-  } else {
+  if(raw.suggestions.length===0){
     html += `<div class="notif-card"><p>Vas bien — no tenemos sugerencias por ahora.</p></div>`;
+  } else if(recs.length===0){
+    html += `<div class="notif-card"><p>Ya revisaste tus sugerencias de hoy.</p></div>`;
+  } else {
+    html += recs.map(({id,icon,title,text,action,actionLabel})=>`
+      <div class="notif-card suggestion">
+        ${dismissBtn(id)}
+        <div class="nc-head"><span>${icon}</span>${esc(title)}</div>
+        <p>${esc(text)}</p>
+        ${action ? `<div class="btn primary nc-action" onclick="${action}">${esc(actionLabel)}</div>` : ''}
+      </div>`).join('');
   }
 
   wrap.innerHTML = html;
@@ -1475,12 +1579,6 @@ function renderNotificaciones(){
 /* ---------------- Recommendation engine ----------------
    Rule-based, driven entirely by the habits and logs already in local
    storage: no fixed catalog of tips, everything reacts to actual data. */
-const HABIT_CATEGORY_SUGGESTIONS = [
-  { icon:'💧', name:'Beber agua', unitId:'glasses', keywords:['agua','hidrat'], text:'No tienes ningún hábito de hidratación. Uno pequeño puede complementar bien los que ya tienes.' },
-  { icon:'🧘', name:'Meditar', unitId:'minutes', keywords:['medit','mindful','respira'], text:'Ninguno de tus hábitos trabaja la mente. Unos minutos de calma pueden ayudarte a sostener el resto de tus rachas.' },
-  { icon:'📖', name:'Leer', unitId:'pages', keywords:['lee','lectura','libro'], text:'No tienes un hábito de lectura. Unas páginas al día suman mucho con el tiempo.' },
-  { icon:'🏃', name:'Ejercicio', unitId:'minutes', keywords:['ejercicio','correr','gym','entren','deporte'], text:'No tienes ningún hábito de movimiento. Empezar con pocos minutos al día es suficiente.' },
-];
 function habitCategoryPresent(s){
   return state.habits.some(h=>h.icon===s.icon || s.keywords.some(k=>h.name.toLowerCase().includes(k)));
 }
