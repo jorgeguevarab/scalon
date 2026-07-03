@@ -107,8 +107,10 @@
 
   .hc-controls{display:flex; align-items:center; gap:10px; margin-top:15px;}
   .hc-input{ flex:1; display:flex; align-items:center; gap:6px; background:var(--paper); border:1px solid var(--rule); border-radius:10px; padding:11px 13px; min-height:44px; }
-  .hc-input input{ border:none; outline:none; background:none; width:100%; font-family:'IBM Plex Mono',monospace; font-size:17px; color:var(--ink-900); }
-  .hc-input span{font-size:13.5px; color:var(--ink-500);}
+  /* The unit label (e.g. "páginas hoy") must keep its own width and never
+     wrap — the number input is what shrinks when space is tight. */
+  .hc-input input{ border:none; outline:none; background:none; width:0; flex:1 1 auto; min-width:32px; font-family:'IBM Plex Mono',monospace; font-size:17px; color:var(--ink-900); }
+  .hc-input span{font-size:13.5px; color:var(--ink-500); flex-shrink:0; white-space:nowrap;}
   .check-btn{ width:44px; height:44px; border-radius:11px; border:1px solid var(--rule); background:var(--paper); font-size:20px; display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0; transition:.15s; }
   .check-btn.on{background:var(--hc,var(--moss)); border-color:var(--hc,var(--moss)); color:#fff;}
   .check-btn:active, .timer-btn:active{transform:scale(.92);}
@@ -304,22 +306,32 @@
   .lt-btn svg{width:18px; height:18px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round;}
   .lt-btn.active{background:var(--ink-900); color:var(--paper); border-color:var(--ink-900);}
 
-  .hoy-grid{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
-  .hoy-grid .habit-card{margin-bottom:0; padding:14px 14px 12px;}
-  .hoy-grid .hc-name{font-size:15.5px; line-height:1.25;}
+  .hoy-grid{display:grid; grid-template-columns:1fr 1fr; gap:12px; align-items:start;}
+  .hoy-grid .habit-card{margin-bottom:0; padding:14px 14px 12px; min-width:0;}
+  .hoy-grid .hc-name{font-size:15.5px; line-height:1.25; overflow-wrap:break-word;}
   .hoy-grid .hc-week{font-size:11.5px; flex-wrap:wrap;}
-  .hoy-grid .hc-top{flex-wrap:wrap;}
-  .hoy-grid .hc-icon{width:32px; height:32px; font-size:16px; border-radius:9px;}
-  .hoy-grid .hc-target{font-size:16.5px;}
+  /* The column is too narrow for name and target to share a row without one
+     of them wrapping badly — stack them into two full-width rows instead:
+     icon+name on top, target metric right-aligned below. */
+  .hoy-grid .hc-top{flex-direction:column; align-items:stretch; flex-wrap:nowrap; gap:6px;}
+  .hoy-grid .hc-id{min-width:0;}
+  .hoy-grid .hc-icon{width:32px; height:32px; font-size:16px; border-radius:9px; flex-shrink:0;}
+  .hoy-grid .hc-target{font-size:16.5px; white-space:normal;}
   .hoy-grid .hc-target span{font-size:11px;}
   .hoy-grid .hc-controls{margin-top:11px; gap:6px;}
   .hoy-grid .hc-input{padding:8px 10px; min-height:40px;}
+  /* The narrow column has no room for value + unit side by side (e.g. "0
+     segundos hoy") — stack them instead of letting the unit label wrap and
+     collide with the value. */
+  .hoy-grid .hc-input{flex-direction:column; align-items:flex-start; gap:1px;}
   .hoy-grid .hc-input input, .hoy-grid .hc-today-val{font-size:14.5px;}
+  .hoy-grid .hc-input input{width:100%;}
+  .hoy-grid .hc-input span:last-child{font-size:11px;}
   .hoy-grid .check-btn{width:38px; height:38px; font-size:17px; flex-shrink:0;}
   .hoy-grid .timer-row{gap:6px; margin-top:9px; padding-top:9px;}
   .hoy-grid .timer-display{font-size:17px;}
   .hoy-grid .timer-btn{padding:9px 10px; font-size:12.5px; min-height:38px;}
-  .hoy-grid .rating-badge{font-size:12px; padding:7px 10px;}
+  .hoy-grid .rating-badge{font-size:12px; padding:7px 10px; flex-direction:column; align-items:flex-start; gap:2px;}
   .hoy-grid .bump-badge{font-size:12.5px; padding:8px 10px; flex-wrap:wrap;}
   .hoy-grid .note-text{font-size:13px; padding:8px 10px;}
   .hoy-grid .note-add-btn, .hoy-grid .note-edit-btn{font-size:12.5px;}
