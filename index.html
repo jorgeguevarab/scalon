@@ -8,137 +8,139 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Escalón">
-<meta name="theme-color" content="#1E2A38" media="(prefers-color-scheme: dark)">
-<meta name="theme-color" content="#1E2A38" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0D1424" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#0D1424" media="(prefers-color-scheme: light)">
 <link rel="manifest" href="/manifest.json">
-<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' fill='%231E2A38'/%3E%3Crect x='24' y='120' width='34' height='36' fill='%23E2933C'/%3E%3Crect x='66' y='96' width='34' height='60' fill='%23E2933C'/%3E%3Crect x='108' y='68' width='34' height='88' fill='%23E2933C'/%3E%3C/svg%3E">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' fill='%231E2A38'/%3E%3Crect x='24' y='120' width='34' height='36' fill='%23E2933C'/%3E%3Crect x='66' y='96' width='34' height='60' fill='%23E2933C'/%3E%3Crect x='108' y='68' width='34' height='88' fill='%23E2933C'/%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' fill='%230D1424'/%3E%3Crect x='24' y='120' width='34' height='36' fill='%23F2A33C'/%3E%3Crect x='66' y='96' width='34' height='60' fill='%23F2A33C'/%3E%3Crect x='108' y='68' width='34' height='88' fill='%23F2A33C'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' fill='%230D1424'/%3E%3Crect x='24' y='120' width='34' height='36' fill='%23F2A33C'/%3E%3Crect x='66' y='96' width='34' height='60' fill='%23F2A33C'/%3E%3Crect x='108' y='68' width='34' height='88' fill='%23F2A33C'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,900&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <style>
   :root{
-    color-scheme: light dark;
-    --paper:#F7F4EC;
-    --paper-alt:#EFEAE0;
-    --ink-900:#16212C;
-    --ink-700:#2C3B4B;
-    --ink-500:#4E5E6C;
-    --amber:#E2933C;
-    --amber-dim:#F0C896;
-    --moss:#52795F;
-    --moss-dim:#CBDCCF;
-    --rule:#DAD4C4;
-    --danger:#B5533F;
-    --bar:#16212C;
-    --bar-text:#F7F4EC;
-    --bar-text-dim:#9FB0BE;
-    --input-bg:#FFFFFF;
-    --excellent-bg:var(--moss-dim); --excellent-text:#2C4A34;
-    --good-bg:var(--amber-dim); --good-text:#6B4416;
-    --partial-bg:#EADFC2; --partial-text:#6B5A20;
-    --low-bg:#EBD3CC; --low-text:#7A3A2B;
-    --radius:14px;
+    color-scheme: dark;
+    --paper:#0D1424;
+    --paper-alt:#182137;
+    --ink-900:#F3F6FC;
+    --ink-700:#C6CDDC;
+    --ink-500:#8C96AC;
+    --amber:#F2A33C;
+    --amber-dim:#4A3620;
+    --moss:#4BC97B;
+    --moss-dim:#1E3529;
+    --violet:#A78BFA;
+    --rule:#242E48;
+    --danger:#E0654F;
+    --bar:#0D1424;
+    --bar-text:#F3F6FC;
+    --bar-text-dim:#8C96AC;
+    --input-bg:#101830;
+    --excellent-bg:#1E3529; --excellent-text:#8FE0A8;
+    --good-bg:#3D3018; --good-text:#F4C883;
+    --partial-bg:#3A331A; --partial-text:#E0CE8C;
+    --low-bg:#3A2420; --low-text:#E3A996;
+    --radius:22px;
     --safe-top:env(safe-area-inset-top);
     --safe-bottom:env(safe-area-inset-bottom);
-    --glass-bg:rgba(255,255,255,.55);
-    --glass-bg-strong:rgba(255,255,255,.72);
-    --glass-border:rgba(255,255,255,.6);
-    --glass-shine:rgba(255,255,255,.55);
-    --glass-bar-bg:rgba(22,33,44,.62);
-    --glass-bar-border:rgba(255,255,255,.14);
-  }
-  @media (prefers-color-scheme: dark){
-    :root{
-      --paper:#15181D;
-      --paper-alt:#1E2229;
-      --ink-900:#F2EFE7;
-      --ink-700:#C7C2B4;
-      --ink-500:#9BA3AC;
-      --amber-dim:#4A3620;
-      --moss-dim:#24362A;
-      --rule:#2A2F36;
-      --danger:#D97860;
-      --input-bg:#232830;
-      --excellent-bg:#24362A; --excellent-text:#8FCB9F;
-      --good-bg:#4A3620; --good-text:#F0C896;
-      --partial-bg:#3A331A; --partial-text:#E0CE8C;
-      --low-bg:#3A2420; --low-text:#E3A996;
-      --glass-bg:rgba(35,40,48,.55);
-      --glass-bg-strong:rgba(35,40,48,.72);
-      --glass-border:rgba(255,255,255,.1);
-      --glass-shine:rgba(255,255,255,.12);
-      --glass-bar-bg:rgba(13,17,22,.55);
-      --glass-bar-border:rgba(255,255,255,.1);
-    }
+    --glass-bg:rgba(24,33,55,.72);
+    --glass-bg-strong:rgba(24,33,55,.92);
+    --glass-border:rgba(255,255,255,.08);
+    --glass-shine:rgba(255,255,255,.08);
+    --glass-bar-bg:rgba(19,27,46,.9);
+    --glass-bar-border:rgba(255,255,255,.07);
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
   html,body{margin:0; padding:0; background:var(--bar); overscroll-behavior-y:none;}
-  body{ font-family:'Inter',-apple-system,BlinkMacSystemFont,system-ui,sans-serif; font-size:16px; line-height:1.4; color:var(--ink-900); -webkit-font-smoothing:antialiased; min-height:100vh; }
-  .mono{font-family:'IBM Plex Mono',monospace;}
-  .display{font-family:'Fraunces',serif;}
+  body{ font-family:'Nunito',-apple-system,BlinkMacSystemFont,system-ui,sans-serif; font-size:16px; line-height:1.4; color:var(--ink-900); -webkit-font-smoothing:antialiased; min-height:100vh; }
+  button,input,select,textarea{font-family:inherit;}
+  .mono{font-variant-numeric:tabular-nums;}
+  .display{font-weight:800;}
 
   #app{ max-width:520px; margin:0 auto; background:var(--paper); min-height:100vh; display:flex; flex-direction:column; position:relative; }
 
-  header.top{ padding:calc(var(--safe-top) + 20px) 20px 16px; background:var(--glass-bar-bg); backdrop-filter:blur(24px) saturate(1.8); -webkit-backdrop-filter:blur(24px) saturate(1.8); color:var(--bar-text); position:sticky; top:0; z-index:10; border-bottom:1px solid var(--glass-bar-border); box-shadow:inset 0 1px 0 rgba(255,255,255,.08); }
-  header.top .wordmark{ font-family:'Fraunces',serif; font-weight:900; font-size:25px; letter-spacing:-0.01em; display:flex; align-items:baseline; gap:8px; }
+  header.top{ padding:calc(var(--safe-top) + 26px) 20px 6px; color:var(--ink-900); }
+  .top-row{ display:flex; justify-content:space-between; align-items:flex-start; gap:12px; }
+  header.top .greet{ font-size:21px; font-weight:700; color:var(--ink-500); }
+  header.top .wordmark{ font-weight:900; font-size:36px; line-height:1.15; letter-spacing:-0.01em; }
   header.top .wordmark .dot{color:var(--amber);}
-  header.top .sub{ font-size:14px; color:var(--bar-text-dim); margin-top:4px; font-family:'IBM Plex Mono',monospace; text-transform:lowercase; }
+  header.top .sub{ font-size:17px; color:var(--ink-500); font-weight:600; margin-top:2px; }
+  .top-actions{ display:flex; gap:12px; margin-top:38px; }
+  .lt-btn{ width:47px; height:47px; border-radius:50%; border:none; background:#232C44; color:#C6CDDC; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:transform .1s ease; }
+  .lt-btn svg{ width:20px; height:20px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+  .lt-btn.active{ background:var(--amber); color:#fff; }
+  .lt-btn:active{ transform:scale(.92); }
 
   main{flex:1; padding:20px 18px calc(116px + var(--safe-bottom));}
   .view{display:none;}
   .view.active{display:block; animation:fade .18s ease;}
   @keyframes fade{from{opacity:0; transform:translateY(4px)} to{opacity:1; transform:none}}
 
-  .section-label{ font-family:'IBM Plex Mono',monospace; font-size:13px; letter-spacing:.07em; text-transform:uppercase; color:var(--ink-500); margin:26px 0 12px; }
+  .section-label{ font-size:17px; font-weight:800; color:var(--ink-900); margin:26px 0 12px; }
   .section-label:first-child{margin-top:0;}
 
   /* ---------- Habit card (Hoy) ---------- */
-  .habit-card{ background:var(--paper-alt); border:1px solid var(--rule); border-radius:var(--radius); padding:18px 18px 16px; margin-bottom:16px; }
-  .habit-card.done{ box-shadow: inset 0 0 0 1.5px var(--hc,var(--moss)); background:linear-gradient(0deg, color-mix(in srgb, var(--hc,var(--moss)) 14%, var(--paper-alt)), var(--paper-alt) 75%); }
-  .hc-top{display:flex; justify-content:space-between; align-items:flex-start; gap:10px;}
-  .hc-id{display:flex; gap:12px; align-items:flex-start;}
-  .hc-icon{ width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:19px; background:var(--hc,var(--amber)); flex-shrink:0; }
-  .hc-name{font-family:'Fraunces',serif; font-weight:600; font-size:18px; line-height:1.3;}
-  .hc-week{font-family:'IBM Plex Mono',monospace; font-size:13px; color:var(--ink-500); margin-top:4px; display:flex; align-items:center; gap:6px;}
-  .streak-chip{ display:inline-flex; align-items:center; gap:3px; background:var(--bar); color:var(--bar-text); border-radius:20px; padding:2px 9px 2px 7px; font-size:12px; }
-  .hc-target{ font-family:'IBM Plex Mono',monospace; font-size:21px; font-weight:600; color:var(--ink-900); white-space:nowrap; text-align:right; }
-  .hc-target span{font-size:13px; color:var(--ink-500); font-weight:400; display:block;}
+  .habit-card{ background:var(--paper-alt); border:1px solid rgba(255,255,255,.04); border-radius:var(--radius); margin-bottom:14px; overflow:hidden; }
+  .hc-main{display:flex; align-items:center; gap:10px; padding:17px 14px;}
+  .hc-icon{ width:52px; height:52px; border-radius:15px; display:flex; align-items:center; justify-content:center; font-size:24px; background:var(--hc,var(--amber)); flex-shrink:0; }
+  .hc-info{flex:1; min-width:0;}
+  .hc-name{font-weight:800; font-size:17px; line-height:1.25; overflow-wrap:break-word;}
+  .hc-week{font-size:14px; font-weight:600; color:var(--ink-500); margin-top:3px;}
+  .hc-streak{font-size:13.5px; font-weight:700; color:var(--ink-700); margin-top:4px;}
+  .hc-ring{display:flex; flex-direction:column; align-items:center; flex-shrink:0; cursor:pointer;}
+  .hc-ring-wrap{position:relative; width:58px; height:58px;}
+  .hc-ring-wrap svg{display:block;}
+  .hc-ring-val{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; line-height:1;}
+  .hc-ring-val b{font-size:17px; font-weight:800; font-variant-numeric:tabular-nums;}
+  .hc-ring-val span{font-size:10.5px; font-weight:700; color:var(--ink-500); margin-top:2px;}
+  .hc-ring-cap{font-size:11.5px; font-weight:600; color:var(--ink-500); margin-top:4px;}
+  .hc-action{ width:50px; height:50px; border-radius:15px; border:none; display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0; transition:transform .1s ease; }
+  .hc-action:active{transform:scale(.92);}
+  .hc-action.filled{background:var(--hc,var(--amber)); color:#fff;}
+  .hc-action.ghost{background:transparent; border:1.5px solid var(--rule); color:var(--ink-500);}
+  .hc-action svg{width:22px; height:22px;}
+  .hc-input-row{ display:flex; align-items:center; gap:8px; margin:0 16px 14px; background:var(--input-bg); border:1px solid var(--rule); border-radius:14px; padding:12px 14px; }
+  .hc-input-row input{ border:none; outline:none; background:none; width:0; flex:1 1 auto; min-width:32px; font-size:17px; font-weight:700; color:var(--ink-900); font-variant-numeric:tabular-nums; }
+  .hc-input-row span{font-size:13.5px; font-weight:600; color:var(--ink-500); flex-shrink:0; white-space:nowrap;}
+  .hc-foot{display:flex; border-top:1px solid var(--rule);}
+  .hc-foot > span{ display:flex; align-items:center; gap:7px; padding:13px 14px; min-height:44px; font-size:13.5px; font-weight:600; color:var(--ink-500); }
+  .hc-foot svg{width:17px; height:17px; flex-shrink:0; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round;}
+  .hc-note-btn{cursor:pointer; flex:0 0 auto;}
+  .hc-note-btn:active{opacity:.6;}
+  .hc-status{flex:1; justify-content:flex-end; text-align:right;}
+  .hc-status span{font-variant-numeric:tabular-nums;}
 
-  .hc-controls{display:flex; align-items:center; gap:10px; margin-top:15px;}
-  .hc-input{ flex:1; display:flex; align-items:center; gap:6px; background:var(--paper); border:1px solid var(--rule); border-radius:10px; padding:11px 13px; min-height:44px; }
-  /* The unit label (e.g. "páginas hoy") must keep its own width and never
-     wrap — the number input is what shrinks when space is tight. */
-  .hc-input input{ border:none; outline:none; background:none; width:0; flex:1 1 auto; min-width:32px; font-family:'IBM Plex Mono',monospace; font-size:17px; color:var(--ink-900); }
-  .hc-input span{font-size:13.5px; color:var(--ink-500); flex-shrink:0; white-space:nowrap;}
-  .check-btn{ width:44px; height:44px; border-radius:11px; border:1px solid var(--rule); background:var(--paper); font-size:20px; display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0; transition:.15s; }
-  .check-btn.on{background:var(--hc,var(--moss)); border-color:var(--hc,var(--moss)); color:#fff;}
-  .check-btn:active, .timer-btn:active{transform:scale(.92);}
+  /* ---------- Resumen de hoy ---------- */
+  .sum-head{display:flex; justify-content:space-between; align-items:baseline; margin:8px 0 14px; gap:10px;}
+  .sum-head .ttl{font-size:18px; font-weight:800;}
+  .sum-head .cnt{font-size:13.5px; font-weight:600; color:var(--ink-500); white-space:nowrap;}
+  .sum-card{ display:flex; background:var(--paper-alt); border:1px solid rgba(255,255,255,.04); border-radius:var(--radius); padding:22px 8px; margin-bottom:10px; }
+  .sum-item{flex:1; display:flex; flex-direction:column; align-items:center; text-align:center; gap:3px; min-width:0; padding:0 6px;}
+  .sum-item + .sum-item{border-left:1px solid var(--rule);}
+  .sum-ic{height:52px; display:flex; align-items:center; justify-content:center; margin-bottom:8px;}
+  .sum-n{font-size:30px; font-weight:800; line-height:1; font-variant-numeric:tabular-nums;}
+  .sum-l{font-size:13.5px; font-weight:600; color:var(--ink-500); line-height:1.3;}
 
-  .timer-row{ display:flex; align-items:center; gap:10px; margin-top:12px; padding-top:12px; border-top:1px dashed var(--rule); }
-  .timer-display{ font-family:'IBM Plex Mono',monospace; font-size:25px; font-weight:600; color:var(--ink-900); flex:1; }
-  .timer-display.running{color:var(--hc,var(--amber));}
-  .timer-btn{ border:none; border-radius:10px; padding:13px 18px; font-size:14.5px; font-weight:600; cursor:pointer; font-family:'IBM Plex Mono',monospace; min-height:44px; }
-  .timer-btn.start{background:var(--hc,var(--amber)); color:var(--ink-900);}
-  .timer-btn.stop{background:var(--ink-900); color:var(--paper);}
+  /* ---------- Category groups (Hoy) ---------- */
+  .cat-group-head{display:flex; align-items:center; gap:10px; margin:26px 2px 12px; min-height:36px; cursor:pointer;}
+  .cat-group-head:active{opacity:.7;}
+  .cgh-ic{font-size:20px; line-height:1;}
+  .cgh-name{font-size:18px; font-weight:800; flex:1;}
+  .cgh-count{font-size:13.5px; font-weight:600; color:var(--ink-500);}
+  .cgh-chev{color:var(--ink-500); display:flex;}
+  .cgh-chev svg{width:20px; height:20px; fill:none; stroke:currentColor; stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round;}
 
-  .rating-badge{ margin-top:12px; padding:10px 14px; border-radius:10px; font-size:13.5px; display:flex; justify-content:space-between; align-items:center; }
+  .rating-badge{ margin:0 16px 14px; padding:10px 14px; border-radius:12px; font-size:13.5px; font-weight:600; display:flex; justify-content:space-between; align-items:center; }
   .rating-badge.excellent{background:var(--excellent-bg); color:var(--excellent-text);}
   .rating-badge.good{background:var(--good-bg); color:var(--good-text);}
   .rating-badge.partial{background:var(--partial-bg); color:var(--partial-text);}
   .rating-badge.low{background:var(--low-bg); color:var(--low-text);}
 
-  .bump-badge{ margin-top:12px; padding:11px 14px; border-radius:10px; background:var(--ink-900); color:var(--paper); font-size:14px; display:flex; justify-content:space-between; align-items:center; gap:10px; }
-  .bump-badge button{ background:var(--amber); color:var(--ink-900); border:none; border-radius:8px; padding:9px 13px; font-size:13.5px; font-weight:600; font-family:'IBM Plex Mono',monospace; cursor:pointer; white-space:nowrap; min-height:40px; }
+  .bump-badge{ margin:0 16px 14px; padding:11px 14px; border-radius:12px; background:var(--input-bg); border:1px solid var(--rule); color:var(--ink-900); font-size:14px; font-weight:600; display:flex; justify-content:space-between; align-items:center; gap:10px; }
+  .bump-badge button{ background:var(--amber); color:#fff; border:none; border-radius:10px; padding:9px 13px; font-size:13.5px; font-weight:700; font-variant-numeric:tabular-nums; cursor:pointer; white-space:nowrap; min-height:40px; }
 
-  .note-block{margin-top:12px;}
-  .note-add-btn{ font-size:14px; color:var(--ink-500); cursor:pointer; display:inline-flex; align-items:center; gap:6px; padding:6px 0; min-height:44px; box-sizing:border-box; }
-  .note-add-btn:active{opacity:.6;}
-  .note-text{ font-size:15px; line-height:1.55; color:var(--ink-700); background:var(--paper); border:1px solid var(--rule); border-radius:10px; padding:11px 13px; word-break:break-word; white-space:pre-wrap; }
+  .note-block{margin:0 16px 14px;}
+  .note-text{ font-size:15px; line-height:1.55; color:var(--ink-700); background:var(--input-bg); border:1px solid var(--rule); border-radius:12px; padding:11px 13px; word-break:break-word; white-space:pre-wrap; }
   .note-text a{ color:var(--hc,var(--amber)); text-decoration:underline; }
-  .note-edit-row{margin-top:6px;}
-  .note-edit-btn{ font-size:13.5px; color:var(--ink-500); cursor:pointer; display:inline-block; padding:6px 0; }
-  .note-edit-btn:active{opacity:.6;}
 
   .empty-state{ text-align:center; padding:56px 20px; color:var(--ink-500); }
   .empty-state .display{ font-size:21px; color:var(--ink-900); margin-bottom:8px; }
@@ -147,8 +149,8 @@
   .habit-row{ display:flex; justify-content:space-between; align-items:center; padding:16px 4px; min-height:44px; border-bottom:1px solid var(--rule); cursor:pointer; gap:10px; transition:opacity .1s ease; }
   .habit-row:active{opacity:.55;}
   .habit-row:last-child{border-bottom:none;}
-  .habit-row .name{font-family:'Fraunces',serif; font-weight:600; font-size:17.5px;}
-  .habit-row .meta{font-family:'IBM Plex Mono',monospace; font-size:13px; color:var(--ink-500); margin-top:3px;}
+  .habit-row .name{font-weight:600; font-size:17.5px;}
+  .habit-row .meta{font-variant-numeric:tabular-nums; font-size:13px; color:var(--ink-500); margin-top:3px;}
   .cat-chip{ display:inline-flex; align-items:center; gap:3px; font-size:12px; color:var(--ink-500); background:var(--paper); border:1px solid var(--rule); border-radius:10px; padding:2px 8px; vertical-align:middle; }
   .habit-row .arrow{color:var(--ink-500); font-size:20px;}
 
@@ -156,26 +158,25 @@
   .fab:active{transform:scale(.9);}
   @media (max-width:600px){ .fab{ right:20px; } }
 
-  nav.bottom{ position:fixed; bottom:calc(14px + var(--safe-bottom)); left:50%; transform:translateX(-50%); width:min(488px, calc(100vw - 32px)); background:var(--glass-bar-bg); backdrop-filter:blur(28px) saturate(1.8); -webkit-backdrop-filter:blur(28px) saturate(1.8); display:flex; padding:10px 8px; border:1px solid var(--glass-bar-border); border-radius:28px; box-shadow:0 10px 32px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.1); z-index:15; }
-  nav.bottom button{ flex:1; background:none; border:none; color:var(--bar-text-dim); display:flex; flex-direction:column; align-items:center; gap:5px; font-family:'IBM Plex Mono',monospace; font-size:11.5px; letter-spacing:.02em; padding:8px 0; min-height:44px; cursor:pointer; text-transform:uppercase; transition:transform .1s ease; }
-  nav.bottom button.active{color:var(--amber);}
-  nav.bottom button:active{transform:scale(.9);}
+  nav.bottom{ position:fixed; bottom:calc(12px + var(--safe-bottom)); left:50%; transform:translateX(-50%); width:min(492px, calc(100vw - 24px)); background:var(--glass-bar-bg); backdrop-filter:blur(24px) saturate(1.6); -webkit-backdrop-filter:blur(24px) saturate(1.6); display:flex; padding:10px; border:1px solid var(--glass-bar-border); border-radius:28px; box-shadow:0 12px 32px rgba(0,0,0,.45); z-index:15; }
+  nav.bottom button{ flex:1; background:none; border:none; color:var(--bar-text-dim); display:flex; flex-direction:column; align-items:center; gap:4px; font-size:12px; font-weight:700; padding:9px 0 7px; min-height:44px; cursor:pointer; border-radius:18px; transition:transform .1s ease; }
+  nav.bottom button.active{color:var(--amber); background:rgba(242,163,60,.1);}
+  nav.bottom button:active{transform:scale(.94);}
   nav.bottom button .ic{font-size:19px; line-height:1; display:flex;}
-  nav.bottom button .ic svg{width:24px; height:24px; fill:none; stroke:currentColor; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round;}
-  nav.bottom button.active .ic svg{fill:currentColor; fill-opacity:.14;}
+  nav.bottom button .ic svg{width:24px; height:24px; fill:none; stroke:currentColor; stroke-width:1.9; stroke-linecap:round; stroke-linejoin:round;}
 
   .back-row{display:flex; align-items:center; gap:10px; margin-bottom:6px; padding:8px 0; min-height:44px; cursor:pointer;}
   .back-row .chev{font-size:22px; color:var(--ink-500);}
-  .back-row span.txt{font-family:'IBM Plex Mono',monospace; font-size:13.5px; color:var(--ink-500); text-transform:uppercase; letter-spacing:.05em;}
+  .back-row span.txt{font-variant-numeric:tabular-nums; font-size:13.5px; color:var(--ink-500); text-transform:uppercase; letter-spacing:.05em;}
 
   .detail-head{display:flex; align-items:center; gap:14px; margin:10px 0 2px;}
   .detail-icon{ width:52px; height:52px; border-radius:13px; display:flex; align-items:center; justify-content:center; font-size:26px; background:var(--hc,var(--amber)); flex-shrink:0; }
-  .detail-title{font-family:'Fraunces',serif; font-weight:900; font-size:27px;}
-  .detail-sub{font-family:'IBM Plex Mono',monospace; font-size:13.5px; color:var(--ink-500); margin:9px 0 18px; line-height:1.5;}
+  .detail-title{font-weight:900; font-size:27px;}
+  .detail-sub{font-variant-numeric:tabular-nums; font-size:13.5px; color:var(--ink-500); margin:9px 0 18px; line-height:1.5;}
 
   .stat-row{display:flex; gap:10px; margin-bottom:6px;}
   .stat-box{ flex:1; background:var(--paper-alt); border:1px solid var(--rule); border-radius:12px; padding:14px 10px; text-align:center; }
-  .stat-box .n{font-family:'IBM Plex Mono',monospace; font-size:25px; font-weight:600; color:var(--hc,var(--ink-900));}
+  .stat-box .n{font-variant-numeric:tabular-nums; font-size:25px; font-weight:600; color:var(--hc,var(--ink-900));}
   .stat-box .l{font-size:12px; color:var(--ink-500); text-transform:uppercase; letter-spacing:.03em; margin-top:3px;}
 
   .badge-row{display:flex; flex-wrap:wrap; gap:9px; margin:16px 0 4px;}
@@ -187,16 +188,16 @@
   .step{ display:flex; flex-direction:column; align-items:center; justify-content:flex-end; min-width:38px; height:100%; flex-shrink:0; }
   .step .bar{ width:100%; background:var(--rule); border-radius:5px 5px 0 0; position:relative; transition:height .3s ease; }
   .step.current .bar{background:var(--hc,var(--amber));}
-  .step .val{font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--ink-500); margin-bottom:5px;}
+  .step .val{font-variant-numeric:tabular-nums; font-size:11.5px; color:var(--ink-500); margin-bottom:5px;}
   .step.current .val{color:var(--ink-900); font-weight:600;}
-  .step .wk{font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--ink-500); margin-top:6px;}
+  .step .wk{font-variant-numeric:tabular-nums; font-size:11px; color:var(--ink-500); margin-top:6px;}
 
   .cal-nav{display:flex; justify-content:space-between; align-items:center; margin:28px 0 14px;}
   .cal-nav button{background:none; border:1px solid var(--rule); border-radius:9px; width:40px; height:40px; font-size:17px; color:var(--ink-700); cursor:pointer;}
-  .cal-nav .lbl{font-family:'IBM Plex Mono',monospace; font-size:14.5px; text-transform:capitalize;}
+  .cal-nav .lbl{font-variant-numeric:tabular-nums; font-size:14.5px; text-transform:capitalize;}
   .cal-grid{display:grid; grid-template-columns:repeat(7,1fr); gap:4px;}
-  .cal-dow{font-family:'IBM Plex Mono',monospace; font-size:11px; text-align:center; color:var(--ink-500); text-transform:uppercase;}
-  .cal-cell{ aspect-ratio:1; border-radius:7px; display:flex; align-items:center; justify-content:center; font-family:'IBM Plex Mono',monospace; font-size:12.5px; color:var(--ink-500); border:1px solid var(--rule); background:var(--paper); }
+  .cal-dow{font-variant-numeric:tabular-nums; font-size:11px; text-align:center; color:var(--ink-500); text-transform:uppercase;}
+  .cal-cell{ aspect-ratio:1; border-radius:7px; display:flex; align-items:center; justify-content:center; font-variant-numeric:tabular-nums; font-size:12.5px; color:var(--ink-500); border:1px solid var(--rule); background:var(--paper); }
   .cal-cell.blank{border:none; background:none;}
   .cal-cell.done{background:var(--hc,var(--moss)); border-color:var(--hc,var(--moss)); color:#fff; font-weight:600;}
   .cal-cell.missed{background:var(--paper-alt); color:var(--ink-500);}
@@ -212,10 +213,10 @@
   .modal-overlay.show{display:flex;}
   .modal{ background:var(--glass-bg-strong); backdrop-filter:blur(36px) saturate(1.8); -webkit-backdrop-filter:blur(36px) saturate(1.8); width:100%; max-width:520px; border-radius:26px 26px 0 0; border:1px solid var(--glass-border); border-bottom:none; box-shadow:0 -8px 32px rgba(0,0,0,.2), inset 0 1px 0 var(--glass-shine); padding:12px 20px calc(28px + var(--safe-bottom)); max-height:88vh; overflow-y:auto; }
   .modal .grabber{ width:36px; height:5px; border-radius:3px; background:var(--rule); margin:0 auto 18px; }
-  .modal h2{font-family:'Fraunces',serif; font-size:23px; margin:0 0 20px;}
+  .modal h2{font-size:23px; margin:0 0 20px;}
   .field{margin-bottom:18px;}
-  .field label{display:block; font-family:'IBM Plex Mono',monospace; font-size:12.5px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-500); margin-bottom:7px;}
-  .field input, .field select, .field textarea{ width:100%; padding:14px; min-height:48px; border:1px solid var(--rule); border-radius:11px; background:var(--input-bg); font-size:16px; font-family:'Inter',sans-serif; color:var(--ink-900); }
+  .field label{display:block; font-variant-numeric:tabular-nums; font-size:12.5px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-500); margin-bottom:7px;}
+  .field input, .field select, .field textarea{ width:100%; padding:14px; min-height:48px; border:1px solid var(--rule); border-radius:11px; background:var(--input-bg); font-size:16px; color:var(--ink-900); }
   .field textarea{ min-height:110px; resize:vertical; }
   .row2{display:flex; gap:12px;}
   .row2 .field{flex:1;}
@@ -234,13 +235,13 @@
   .color-dot{ width:22px; height:22px; border-radius:50%; flex-shrink:0; border:1px solid var(--rule); }
 
   .segmented{display:flex; border:1px solid var(--rule); border-radius:11px; overflow:hidden;}
-  .seg-opt{flex:1; padding:12px 6px; min-height:44px; border:none; background:var(--paper); color:var(--ink-700); font-size:13.5px; font-family:'Inter',sans-serif; cursor:pointer; border-right:1px solid var(--rule);}
+  .seg-opt{flex:1; padding:12px 6px; min-height:44px; border:none; background:var(--paper); color:var(--ink-700); font-size:13.5px; cursor:pointer; border-right:1px solid var(--rule);}
   .seg-opt:last-child{border-right:none;}
   .seg-opt.active{background:var(--ink-900); color:var(--paper);}
-  .day-chip{width:44px; height:44px; font-size:13.5px; font-family:'IBM Plex Mono',monospace;}
+  .day-chip{width:44px; height:44px; font-size:13.5px; font-variant-numeric:tabular-nums;}
 
   .settings-card{ background:var(--paper-alt); border:1px solid var(--rule); border-radius:var(--radius); padding:18px; margin-bottom:16px; }
-  .settings-card h3{font-family:'Fraunces',serif; font-size:17px; margin:0 0 7px;}
+  .settings-card h3{font-size:17px; margin:0 0 7px;}
   .settings-card p{font-size:14.5px; color:var(--ink-500); line-height:1.55; margin:0 0 14px;}
   .settings-card button{ width:100%; padding:13px; min-height:48px; border-radius:10px; border:none; background:var(--ink-900); color:var(--paper); font-size:15px; font-weight:600; cursor:pointer; transition:transform .1s ease, opacity .1s ease; }
   .settings-card button:active{transform:scale(.98); opacity:.85;}
@@ -250,30 +251,27 @@
   #toast{ position:fixed; bottom:calc(122px + var(--safe-bottom)); left:50%; transform:translateX(-50%); background:var(--glass-bar-bg); backdrop-filter:blur(24px) saturate(1.8); -webkit-backdrop-filter:blur(24px) saturate(1.8); border:1px solid var(--glass-bar-border); box-shadow:0 6px 20px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.08); color:var(--bar-text); padding:12px 20px; border-radius:20px; font-size:14.5px; opacity:0; transition:opacity .25s; z-index:60; pointer-events:none; max-width:80%; text-align:center; }
   #toast.show{opacity:1;}
 
-  .hc-input.readonly{opacity:.9;}
-  .hc-today-val{font-family:'IBM Plex Mono',monospace; font-size:17px; font-weight:600; color:var(--ink-900);}
-
   .focus-overlay{ position:fixed; inset:0; z-index:70; display:none; flex-direction:column; align-items:center; justify-content:center; gap:14px; padding:32px 28px calc(32px + var(--safe-bottom)); background:linear-gradient(180deg, color-mix(in srgb, var(--hc,var(--amber)) 32%, var(--bar)), var(--bar) 65%); color:var(--bar-text); text-align:center; }
   .focus-overlay.show{display:flex;}
   .focus-minimize{ position:absolute; top:calc(var(--safe-top) + 16px); right:20px; background:rgba(255,255,255,.14); border:none; color:var(--bar-text); width:44px; height:44px; border-radius:50%; font-size:18px; cursor:pointer; }
   .focus-icon{font-size:46px;}
-  .focus-name{font-family:'Fraunces',serif; font-weight:700; font-size:23px;}
-  .focus-timer{font-family:'IBM Plex Mono',monospace; font-size:56px; font-weight:600; letter-spacing:-.01em; margin:4px 0;}
-  .focus-meta{font-family:'IBM Plex Mono',monospace; font-size:13.5px; color:var(--bar-text-dim); margin-bottom:6px; line-height:1.55;}
-  .focus-note{ width:100%; max-width:360px; min-height:90px; border-radius:12px; border:1px solid rgba(255,255,255,.2); background:rgba(255,255,255,.08); color:var(--bar-text); padding:13px; font-family:'Inter',sans-serif; font-size:16px; resize:none; }
+  .focus-name{font-weight:700; font-size:23px;}
+  .focus-timer{font-variant-numeric:tabular-nums; font-size:56px; font-weight:600; letter-spacing:-.01em; margin:4px 0;}
+  .focus-meta{font-variant-numeric:tabular-nums; font-size:13.5px; color:var(--bar-text-dim); margin-bottom:6px; line-height:1.55;}
+  .focus-note{ width:100%; max-width:360px; min-height:90px; border-radius:12px; border:1px solid rgba(255,255,255,.2); background:rgba(255,255,255,.08); color:var(--bar-text); padding:13px; font-size:16px; resize:none; }
   .focus-note::placeholder{color:var(--bar-text-dim);}
   .focus-stop{ max-width:360px; width:100%; background:var(--bar-text); color:var(--bar); border:none; padding:15px; min-height:48px; border-radius:11px; font-size:15px; font-weight:600; cursor:pointer; transition:transform .1s ease; }
   .focus-stop:active{transform:scale(.97);}
 
   .diary-list{display:flex; flex-direction:column; gap:11px; margin-bottom:6px;}
   .diary-entry{ background:var(--paper-alt); border:1px solid var(--rule); border-radius:10px; padding:12px 14px; }
-  .diary-date{ font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--ink-500); text-transform:uppercase; margin-bottom:5px; }
+  .diary-date{ font-variant-numeric:tabular-nums; font-size:12px; color:var(--ink-500); text-transform:uppercase; margin-bottom:5px; }
   .diary-note{ font-size:15px; line-height:1.5; word-break:break-word; }
   .diary-note a{ color:var(--amber); text-decoration:underline; }
 
   /* ---------- Notifications ---------- */
   .notif-card{ position:relative; background:var(--paper-alt); border:1px solid var(--rule); border-left:3px solid var(--rule); border-radius:var(--radius); padding:16px 78px 16px 18px; margin-bottom:13px; }
-  .notif-card .nc-head{display:flex; align-items:center; gap:9px; font-family:'Fraunces',serif; font-weight:600; font-size:16.5px; margin-bottom:5px;}
+  .notif-card .nc-head{display:flex; align-items:center; gap:9px; font-weight:600; font-size:16.5px; margin-bottom:5px;}
   .notif-card p{font-size:14.5px; color:var(--ink-500); line-height:1.55; margin:0;}
   .notif-card.streak{border-left-color:var(--amber);}
   .notif-card.missed{border-left-color:var(--danger);}
@@ -292,72 +290,61 @@
   .cat-card{ background:var(--paper-alt); border:1px solid var(--rule); border-left:3px solid var(--rule); border-radius:var(--radius); padding:16px 18px; margin-bottom:13px; }
   .cat-head{display:flex; align-items:center; gap:9px; margin-bottom:9px;}
   .cat-ic{font-size:16px; width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0;}
-  .cat-name{font-family:'Fraunces',serif; font-weight:600; font-size:16px; flex:1;}
-  .cat-count{font-size:12.5px; color:var(--ink-500); font-family:'IBM Plex Mono',monospace;}
+  .cat-name{font-weight:600; font-size:16px; flex:1;}
+  .cat-count{font-size:12.5px; color:var(--ink-500); font-variant-numeric:tabular-nums;}
   .cat-bar{height:7px; border-radius:4px; background:var(--rule); overflow:hidden; margin-bottom:7px;}
   .cat-bar-fill{height:100%; background:var(--amber); border-radius:4px;}
-  .cat-meta{font-size:13px; color:var(--ink-500); font-family:'IBM Plex Mono',monospace;}
+  .cat-meta{font-size:13px; color:var(--ink-500); font-variant-numeric:tabular-nums;}
 
   .hoy-head{display:flex; justify-content:space-between; align-items:center;}
   .clear-all-link{font-size:13.5px; color:var(--amber); cursor:pointer; padding:8px 0; min-height:44px; display:inline-flex; align-items:center;}
   .clear-all-link:active{opacity:.6;}
-  .layout-toggle{display:flex; gap:6px;}
-  .lt-btn{width:40px; height:40px; border-radius:9px; border:1px solid var(--rule); background:var(--paper-alt); color:var(--ink-500); display:flex; align-items:center; justify-content:center; cursor:pointer;}
-  .lt-btn svg{width:18px; height:18px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round;}
-  .lt-btn.active{background:var(--ink-900); color:var(--paper); border-color:var(--ink-900);}
-
   .hoy-grid{display:grid; grid-template-columns:1fr 1fr; gap:12px; align-items:start;}
-  .hoy-grid .habit-card{margin-bottom:0; padding:14px 14px 12px; min-width:0;}
-  .hoy-grid .hc-name{font-size:15.5px; line-height:1.25; overflow-wrap:break-word;}
-  .hoy-grid .hc-week{font-size:11.5px; flex-wrap:wrap;}
-  /* The column is too narrow for name and target to share a row without one
-     of them wrapping badly — stack them into two full-width rows instead:
-     icon+name on top, target metric right-aligned below. */
-  .hoy-grid .hc-top{flex-direction:column; align-items:stretch; flex-wrap:nowrap; gap:6px;}
-  .hoy-grid .hc-id{min-width:0;}
-  .hoy-grid .hc-icon{width:32px; height:32px; font-size:16px; border-radius:9px; flex-shrink:0;}
-  .hoy-grid .hc-target{font-size:16.5px; white-space:normal;}
-  .hoy-grid .hc-target span{font-size:11px;}
-  .hoy-grid .hc-controls{margin-top:11px; gap:6px;}
-  .hoy-grid .hc-input{padding:8px 10px; min-height:40px;}
-  /* The narrow column has no room for value + unit side by side (e.g. "0
-     segundos hoy") — stack them instead of letting the unit label wrap and
-     collide with the value. */
-  .hoy-grid .hc-input{flex-direction:column; align-items:flex-start; gap:1px;}
-  .hoy-grid .hc-input input, .hoy-grid .hc-today-val{font-size:14.5px;}
-  .hoy-grid .hc-input input{width:100%;}
-  .hoy-grid .hc-input span:last-child{font-size:11px;}
-  .hoy-grid .check-btn{width:38px; height:38px; font-size:17px; flex-shrink:0;}
-  .hoy-grid .timer-row{gap:6px; margin-top:9px; padding-top:9px;}
-  .hoy-grid .timer-display{font-size:17px;}
-  .hoy-grid .timer-btn{padding:9px 10px; font-size:12.5px; min-height:38px;}
-  .hoy-grid .rating-badge{font-size:12px; padding:7px 10px; flex-direction:column; align-items:flex-start; gap:2px;}
-  .hoy-grid .bump-badge{font-size:12.5px; padding:8px 10px; flex-wrap:wrap;}
+  .hoy-grid .habit-card{margin-bottom:0; min-width:0;}
+  /* The column is too narrow for icon, name, ring and button to share one
+     row — wrap into two rows: icon + name first, ring + action below. */
+  .hoy-grid .hc-main{flex-wrap:wrap; gap:10px; padding:14px;}
+  .hoy-grid .hc-info{flex:1 1 calc(100% - 54px);}
+  .hoy-grid .hc-icon{width:42px; height:42px; font-size:20px; border-radius:12px;}
+  .hoy-grid .hc-name{font-size:15.5px;}
+  .hoy-grid .hc-week{font-size:12.5px;}
+  .hoy-grid .hc-streak{font-size:12px;}
+  .hoy-grid .hc-ring{margin-right:auto;}
+  .hoy-grid .hc-action{width:46px; height:46px; border-radius:14px;}
+  .hoy-grid .hc-input-row{margin:0 14px 12px; padding:9px 11px;}
+  .hoy-grid .hc-input-row input{font-size:14.5px;}
+  .hoy-grid .hc-input-row span{font-size:11px;}
+  /* Footer stacks vertically in the narrow column. */
+  .hoy-grid .hc-foot{flex-direction:column;}
+  .hoy-grid .hc-foot > span{padding:10px 14px; min-height:0; font-size:12.5px;}
+  .hoy-grid .hc-foot > span + span{padding-top:0; justify-content:flex-start;}
+  .hoy-grid .rating-badge{font-size:12px; padding:7px 10px; margin:0 14px 12px; flex-direction:column; align-items:flex-start; gap:2px;}
+  .hoy-grid .bump-badge{font-size:12.5px; padding:8px 10px; margin:0 14px 12px; flex-wrap:wrap;}
+  .hoy-grid .note-block{margin:0 14px 12px;}
   .hoy-grid .note-text{font-size:13px; padding:8px 10px;}
-  .hoy-grid .note-add-btn, .hoy-grid .note-edit-btn{font-size:12.5px;}
   @media (max-width:380px){ .hoy-grid{grid-template-columns:1fr;} }
 
   nav.bottom button .ic{position:relative;}
-  nav.bottom .dot{ position:absolute; top:-2px; right:-5px; width:8px; height:8px; border-radius:50%; background:var(--danger); border:1.5px solid var(--glass-bar-bg); display:none; }
+  nav.bottom .dot{ position:absolute; top:-2px; right:-5px; width:8px; height:8px; border-radius:50%; background:var(--amber); border:1.5px solid var(--glass-bar-bg); display:none; }
   nav.bottom .dot.show{display:block;}
 
   /* ---------- Charts ---------- */
   .chart-wrap{margin-bottom:22px;}
   .chart-svg{width:100%; height:110px; display:block;}
-  .chart-caption{font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--ink-500); margin-bottom:7px;}
+  .chart-caption{font-variant-numeric:tabular-nums; font-size:12px; color:var(--ink-500); margin-bottom:7px;}
 
   /* ---------- Global calendar ---------- */
-  .gcal-cell{ aspect-ratio:1; border-radius:7px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1px; font-family:'IBM Plex Mono',monospace; font-size:12.5px; color:var(--ink-700); border:1px solid var(--rule); cursor:pointer; background:var(--paper); }
+  .gcal-cell{ aspect-ratio:1; border-radius:7px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1px; font-variant-numeric:tabular-nums; font-size:12.5px; color:var(--ink-700); border:1px solid var(--rule); cursor:pointer; background:var(--paper); }
   .gcal-cell.blank{border:none; background:none; cursor:default;}
   .gcal-cell.future{opacity:.4; cursor:default;}
   .gcal-cell.selected{outline:2px solid var(--ink-900); outline-offset:1px;}
   .gcal-cell .gr{font-size:9.5px; color:var(--ink-500);}
-  .cal-day-label{font-family:'IBM Plex Mono',monospace; font-size:13.5px; color:var(--ink-500); text-transform:capitalize; margin:24px 0 12px;}
+  .cal-day-label{font-variant-numeric:tabular-nums; font-size:13.5px; color:var(--ink-500); text-transform:capitalize; margin:24px 0 12px;}
   .cal-day-list{display:flex; flex-direction:column; gap:10px;}
   .cal-day-item{display:flex; align-items:center; gap:12px; padding:13px 14px; min-height:44px; background:var(--paper-alt); border:1px solid var(--rule); border-radius:12px;}
   .cal-day-item .cdi-icon{width:38px; height:38px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:17px; background:var(--hc,var(--amber)); flex-shrink:0;}
-  .cal-day-item .cdi-name{font-family:'Fraunces',serif; font-weight:600; font-size:16px;}
-  .cal-day-item .cdi-meta{font-family:'IBM Plex Mono',monospace; font-size:12.5px; color:var(--ink-500); margin-top:3px;}
+  .cal-day-item .cdi-name{font-weight:600; font-size:16px;}
+  .cal-day-item .cdi-meta{font-variant-numeric:tabular-nums; font-size:12.5px; color:var(--ink-500); margin-top:3px;}
   .cal-day-item .cdi-status{margin-left:auto; font-size:19px;}
 </style>
 </head>
@@ -365,19 +352,22 @@
 <div id="app">
 
   <header class="top">
-    <div class="wordmark">Escalón<span class="dot">.</span></div>
-    <div class="sub" id="dateLine">-- --- ----</div>
+    <div class="top-row">
+      <div>
+        <div class="greet" id="greetLine">¡Buenos días! 👋</div>
+        <div class="wordmark">Escalón<span class="dot"> •</span></div>
+        <div class="sub" id="dateLine">-- --- ----</div>
+      </div>
+      <div class="top-actions" id="topActions">
+        <button class="lt-btn" data-layout="stack" onclick="setHoyLayout('stack')" aria-label="Vista en lista"><svg viewBox="0 0 24 24"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg></button>
+        <button class="lt-btn" data-layout="grid" onclick="setHoyLayout('grid')" aria-label="Vista en cuadrícula"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg></button>
+      </div>
+    </div>
   </header>
 
   <main>
     <section class="view active" id="view-hoy">
-      <div class="section-label hoy-head">
-        <span>Hoy</span>
-        <span class="layout-toggle">
-          <button class="lt-btn" data-layout="stack" onclick="setHoyLayout('stack')" aria-label="Vista en lista"><svg viewBox="0 0 24 24"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg></button>
-          <button class="lt-btn" data-layout="grid" onclick="setHoyLayout('grid')" aria-label="Vista en cuadrícula"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1.2"/><rect x="13" y="4" width="7" height="7" rx="1.2"/><rect x="4" y="13" width="7" height="7" rx="1.2"/><rect x="13" y="13" width="7" height="7" rx="1.2"/></svg></button>
-        </span>
-      </div>
+      <div id="hoySummary"></div>
       <div id="hoyList"></div>
     </section>
 
@@ -454,7 +444,7 @@
   <button class="fab" id="fabAdd" onclick="openHabitForm()">+</button>
 
   <nav class="bottom">
-    <button class="active" data-view="hoy" onclick="goTo('hoy')"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18z"/></svg></span>Hoy</button>
+    <button class="active" data-view="hoy" onclick="goTo('hoy')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M3 11.2 12 3.5l9 7.7"/><path d="M5.5 9.8V20.5h13V9.8"/><path d="M10 20.5v-5.2h4v5.2"/></svg></span>Hoy</button>
     <button data-view="calendario" onclick="goTo('calendario')"><span class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="16" rx="2"/><line x1="16" y1="2.5" x2="16" y2="6.5"/><line x1="8" y1="2.5" x2="8" y2="6.5"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>Calendario</button>
     <button data-view="habitos" onclick="goTo('habitos')"><span class="ic"><svg viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></svg></span>Hábitos</button>
     <button data-view="notificaciones" onclick="goTo('notificaciones')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 6.5-2.5 8.5-2.5 8.5h17S18 14.5 18 8z"/><path d="M13.7 20a2 2 0 0 1-3.4 0"/></svg><span class="dot" id="notifDot"></span></span>Avisos</button>
@@ -568,17 +558,17 @@ const ICONS = [
 // category automatically inherits its color, so the palette stays consistent
 // and predictable instead of an arbitrary per-habit choice.
 const CATEGORY_CATALOG = [
-  { id:'spiritual', icon:'🙏', label:'Espiritual', color:'#7A5C99' },
-  { id:'health', icon:'💪', label:'Salud física', color:'#B5533F' },
-  { id:'family', icon:'👨‍👩‍👧', label:'Familia', color:'#9C4F6B' },
-  { id:'mind', icon:'🧘', label:'Mente y bienestar', color:'#2C8C8C' },
-  { id:'work', icon:'💼', label:'Trabajo y estudio', color:'#4C6B8A' },
-  { id:'finance', icon:'💰', label:'Finanzas', color:'#8A6D3B' },
-  { id:'social', icon:'🤝', label:'Social', color:'#C2571C' },
-  { id:'creativity', icon:'🎨', label:'Creatividad', color:'#E2933C' },
-  { id:'home', icon:'🏠', label:'Hogar', color:'#52795F' },
+  { id:'spiritual', icon:'🙏', label:'Espiritual', color:'#B55877' },
+  { id:'health', icon:'💪', label:'Salud física', color:'#E25C4A' },
+  { id:'family', icon:'👨‍👩‍👧', label:'Familia', color:'#C75D9E' },
+  { id:'mind', icon:'🧘', label:'Mente y bienestar', color:'#38B2B2' },
+  { id:'work', icon:'💼', label:'Trabajo y estudio', color:'#5E86C0' },
+  { id:'finance', icon:'💰', label:'Finanzas', color:'#C99A4B' },
+  { id:'social', icon:'🤝', label:'Social', color:'#E0763A' },
+  { id:'creativity', icon:'🎨', label:'Creatividad', color:'#F2A33C' },
+  { id:'home', icon:'🏠', label:'Hogar', color:'#5FA377' },
 ];
-const NO_CATEGORY = { id:'none', icon:'📌', label:'Sin categoría', color:'#2F4858' };
+const NO_CATEGORY = { id:'none', icon:'📌', label:'Sin categoría', color:'#5C7391' };
 function categoryDef(id){ return CATEGORY_CATALOG.find(c=>c.id===id) || null; }
 // The color a habit renders with: always its category's fixed color, falling
 // back to the neutral "sin categoría" color when it has none.
@@ -740,6 +730,7 @@ function goTo(view){
   document.getElementById('view-'+view).classList.add('active');
   document.querySelectorAll('nav.bottom button').forEach(b=>b.classList.toggle('active', b.dataset.view===view));
   document.getElementById('fabAdd').style.display = (view==='habitos') ? 'flex' : 'none';
+  document.getElementById('topActions').style.display = (view==='hoy') ? 'flex' : 'none';
   if(view==='hoy') renderHoy();
   if(view==='habitos') renderHabitos();
   if(view==='calendario') renderCalendario();
@@ -760,72 +751,171 @@ function updateHoyLayoutButtons(){
   const layout = getHoyLayout();
   document.querySelectorAll('.lt-btn').forEach(b=>b.classList.toggle('active', b.dataset.layout===layout));
 }
+
+/* Inline SVG icons for the habit cards and the summary */
+const SVG_PLAY = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8.2 5.6v12.8a.8.8 0 0 0 1.22.68l10.2-6.4a.8.8 0 0 0 0-1.36L9.42 4.92a.8.8 0 0 0-1.22.68z"/></svg>';
+const SVG_STOP = '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6.5" y="6.5" width="11" height="11" rx="2.2"/></svg>';
+const SVG_CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+const SVG_INPUT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="6" width="17" height="12" rx="2.5"/><path d="M7.5 14.8h9"/><path d="M7 9.5h.01M10.3 9.5h.01M13.6 9.5h.01M16.9 9.5h.01"/></svg>';
+const SVG_NOTE = '<svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3.5"/><path d="M8.5 9.5h7M8.5 13h7M8.5 16.5h4"/></svg>';
+const SVG_CLOCK = '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>';
+const SVG_CHEV_DOWN = '<svg viewBox="0 0 24 24"><path d="M6 9.5l6 6 6-6"/></svg>';
+
+// Circular progress ring: faint full track in the habit's color, solid arc for
+// today's progress toward the target.
+function ringSvg(pct, color, size, sw){
+  sw = sw || 5;
+  const half = size/2, r = (size - sw)/2, c = 2*Math.PI*r;
+  const p = Math.min(1, Math.max(0, pct||0));
+  const off = c*(1-p);
+  return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" fill="none">
+    <circle cx="${half}" cy="${half}" r="${r}" stroke="${color}" stroke-opacity=".25" stroke-width="${sw}"/>
+    ${p>0?`<circle cx="${half}" cy="${half}" r="${r}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round" stroke-dasharray="${c.toFixed(2)}" stroke-dashoffset="${off.toFixed(2)}" transform="rotate(-90 ${half} ${half})"/>`:''}
+  </svg>`;
+}
+const UNIT_SHORT = { seconds:'seg', minutes:'min', hours:'h', pages:'pág', words:'pal', reps:'rep', sets:'ser', km:'km', steps:'pasos', glasses:'vasos', liters:'L', calories:'kcal', sessions:'ses' };
+function unitShortLabel(h){ return UNIT_SHORT[h.unitId] || h.unit; }
+
+// "Iniciado hoy 8:00 a. m." — reconstructed from the first timer session of the
+// day (endedAt - duration); manual entries just say "Registrado hoy".
+function hcStatusLabel(h, log){
+  const withEnd = (log.sessions||[]).filter(s=>s.endedAt);
+  if(withEnd.length){
+    const first = withEnd[0];
+    const start = new Date(first.endedAt - (first.seconds||0)*1000);
+    return 'Iniciado hoy ' + start.toLocaleTimeString('es-ES',{hour:'numeric', minute:'2-digit', hour12:true});
+  }
+  if(log.value>0 || log.done) return 'Registrado hoy';
+  return 'Aún no iniciado';
+}
+
+// Count-type habits hide their number input until the keypad button (or the
+// ring) is tapped; not persisted — a reload starts with all inputs closed.
+const hoyOpenInputs = new Set();
+function toggleHoyInput(id){
+  if(hoyOpenInputs.has(id)) hoyOpenInputs.delete(id); else hoyOpenInputs.add(id);
+  renderHoy();
+  const inp = document.getElementById('hin_'+id);
+  if(inp) inp.focus();
+}
+
+function isCatCollapsed(id){ return !!(state.settings && state.settings.collapsedCats && state.settings.collapsedCats.includes(id)); }
+function toggleCatGroup(id){
+  state.settings = state.settings || {};
+  const arr = state.settings.collapsedCats = state.settings.collapsedCats || [];
+  const i = arr.indexOf(id);
+  if(i===-1) arr.push(id); else arr.splice(i,1);
+  saveState();
+  renderHoy();
+}
+
+function renderHoySummary(t){
+  const wrap = document.getElementById('hoySummary');
+  if(!wrap) return;
+  if(state.habits.length===0){ wrap.innerHTML=''; return; }
+  let completed = 0, streakTotal = 0;
+  state.habits.forEach(h=>{
+    const log = h.logs[t];
+    if(log && log.done) completed++;
+    streakTotal += getStreak(h);
+  });
+  const total = state.habits.length;
+  const inProgress = total - completed;
+  const checkIc = `<svg width="48" height="48" viewBox="0 0 48 48" fill="none"><circle cx="24" cy="24" r="21" stroke="#4BC97B" stroke-width="3.5"/><path d="M16 24.5l5.5 5.5L32 19" stroke="#4BC97B" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  const starIc = `<svg width="48" height="48" viewBox="0 0 48 48" fill="none"><circle cx="24" cy="24" r="21" stroke="#A78BFA" stroke-width="3"/><path d="M24 15l2.6 5.4 6 .8-4.4 4.1 1.1 5.9-5.3-2.9-5.3 2.9 1.1-5.9-4.4-4.1 6-.8z" stroke="#A78BFA" stroke-width="2" stroke-linejoin="round"/></svg>`;
+  wrap.innerHTML = `
+    <div class="sum-head"><span class="ttl">Resumen de hoy</span><span class="cnt">${completed} de ${total} hábito${total===1?'':'s'} activo${total===1?'':'s'}</span></div>
+    <div class="sum-card">
+      <div class="sum-item"><div class="sum-ic">${checkIc}</div><div class="sum-n">${completed}</div><div class="sum-l">Completados</div></div>
+      <div class="sum-item"><div class="sum-ic">${ringSvg(total?completed/total:0, '#F2A33C', 48, 4)}</div><div class="sum-n">${inProgress}</div><div class="sum-l">En progreso</div></div>
+      <div class="sum-item"><div class="sum-ic">${starIc}</div><div class="sum-n">${streakTotal}</div><div class="sum-l">Racha total<br>días</div></div>
+    </div>`;
+}
+
 function renderHabitCardHtml(h, t){
   const log = h.logs[t] || { done:false, value:0, sessions:[] };
-  const sessions = log.sessions || [];
   const timeMode = h.unitType === 'time';
   const wIdx = weekIndexFor(h, t);
   const pendingBump = (!h.autoIncrement && wIdx > h.appliedWeekIndex);
   const nextVal = round1(h.currentTarget + h.increment);
   const streak = getStreak(h);
   const running = !!h.timerStart;
-  const elapsedSec = running ? Math.floor((Date.now()-h.timerStart)/1000) : (log.elapsedSeconds||0);
+  const color = habitColor(h);
+  const pct = h.currentTarget>0 ? (log.value||0)/h.currentTarget : (log.done?1:0);
   const rating = (log.value>0) ? computeRating(log.value, h.currentTarget) : null;
+  const inputOpen = !timeMode && hoyOpenInputs.has(h.id);
+
+  let action;
+  if(running) action = `<button class="hc-action filled" onclick="stopTimer('${h.id}')" aria-label="Detener sesión">${SVG_STOP}</button>`;
+  else if(log.done) action = `<button class="hc-action filled" onclick="toggleDone('${h.id}')" aria-label="Desmarcar">${SVG_CHECK}</button>`;
+  else if(timeMode) action = `<button class="hc-action filled" onclick="startTimer('${h.id}')" aria-label="Iniciar cronómetro">${SVG_PLAY}</button>`;
+  else action = `<button class="hc-action ghost" onclick="toggleHoyInput('${h.id}')" aria-label="Registrar avance">${SVG_INPUT}</button>`;
+
+  // The ring is also tappable: starts (or reopens) a session on time habits,
+  // toggles the value input on count habits.
+  const ringTap = timeMode
+    ? (running ? `onclick="openFocus('${h.id}')"` : `onclick="startTimer('${h.id}')"`)
+    : `onclick="toggleHoyInput('${h.id}')"`;
+
+  let statusHtml;
+  if(running){
+    const elapsedSec = Math.floor((Date.now()-h.timerStart)/1000);
+    statusHtml = `${SVG_CLOCK} En curso · <span data-timer-id="${h.id}">${formatMMSS(elapsedSec)}</span>`;
+  } else {
+    statusHtml = `${SVG_CLOCK} ${hcStatusLabel(h, log)}`;
+  }
+  const showFoot = timeMode || log.value>0 || log.done || inputOpen;
 
   return `
-  <div class="habit-card ${log.done?'done':''}" style="--hc:${habitColor(h)}">
-    <div class="hc-top">
-      <div class="hc-id">
-        <div class="hc-icon">${h.icon}</div>
-        <div>
-          <div class="hc-name">${esc(h.name)}</div>
-          <div class="hc-week">Semana ${wIdx+1}
-            ${streak>0?`<span class="streak-chip">🔥 ${streak}</span>`:''}
-          </div>
-        </div>
+  <div class="habit-card ${log.done?'done':''}" style="--hc:${color}">
+    <div class="hc-main">
+      <div class="hc-icon">${h.icon}</div>
+      <div class="hc-info">
+        <div class="hc-name">${esc(h.name)}</div>
+        <div class="hc-week">Semana ${wIdx+1}</div>
+        ${streak>0?`<div class="hc-streak">🔥 ${streak} día${streak===1?'':'s'} de racha</div>`:''}
       </div>
-      <div class="hc-target">${h.currentTarget}<span>${esc(h.unit)} meta</span></div>
+      <div class="hc-ring" ${ringTap} role="button">
+        <div class="hc-ring-wrap">
+          ${ringSvg(pct, color, 62, 5)}
+          <div class="hc-ring-val"><b>${h.currentTarget}</b><span>${esc(unitShortLabel(h))}</span></div>
+        </div>
+        <div class="hc-ring-cap">meta</div>
+      </div>
+      ${action}
     </div>
 
-    <div class="hc-controls">
-      ${timeMode
-        ? `<div class="hc-input readonly"><span class="hc-today-val">${log.value||0}</span><span>${esc(h.unit)} hoy${sessions.length>1?` · ${sessions.length} sesiones`:''}</span></div>`
-        : `<div class="hc-input">
-            <input type="number" step="0.5" min="0" value="${log.value||''}" placeholder="0" onchange="setLogValue('${h.id}', this.value)">
-            <span>${esc(h.unit)} hoy</span>
-          </div>`}
-      <div class="check-btn ${log.done?'on':''}" onclick="toggleDone('${h.id}')">${log.done?'✓':'○'}</div>
-    </div>
-
-    ${timeMode ? `
-    <div class="timer-row">
-      <div class="timer-display ${running?'running':''}" data-timer-id="${h.id}">${formatMMSS(elapsedSec)}</div>
-      ${running
-        ? `<button class="timer-btn stop" onclick="stopTimer('${h.id}')">Detener</button>`
-        : `<button class="timer-btn start" style="background:${habitColor(h)}" onclick="startTimer('${h.id}')">Iniciar</button>`}
+    ${inputOpen ? `
+    <div class="hc-input-row">
+      <input type="number" id="hin_${h.id}" step="0.5" min="0" value="${log.value||''}" placeholder="0" onchange="setLogValue('${h.id}', this.value)">
+      <span>${esc(h.unit)} hoy</span>
     </div>` : ''}
 
     ${rating ? `<div class="rating-badge ${rating.cls}"><span>${rating.label}</span><span>${rating.pct}% de la meta</span></div>` : ''}
 
-    ${(log.value>0 || log.done) ? `
-    <div class="note-block">
-      ${log.dayNote
-        ? `<div class="note-text">${linkify(log.dayNote)}</div><div class="note-edit-row"><span class="note-edit-btn" onclick="openNoteModal('${h.id}')">✎ Editar nota</span></div>`
-        : `<div class="note-add-btn" onclick="openNoteModal('${h.id}')">📝 Agregar nota</div>`}
-    </div>` : ''}
-
     ${pendingBump ? `
     <div class="bump-badge">
       <span>Nueva semana lista para subir</span>
-      <button onclick="confirmBump('${h.id}')" style="background:${habitColor(h)}">Subir a ${nextVal}</button>
+      <button onclick="confirmBump('${h.id}')" style="background:${color}">Subir a ${nextVal}</button>
+    </div>` : ''}
+
+    ${log.dayNote ? `<div class="note-block"><div class="note-text">${linkify(log.dayNote)}</div></div>` : ''}
+
+    ${showFoot ? `
+    <div class="hc-foot">
+      <span class="hc-note-btn" onclick="openNoteModal('${h.id}')">${SVG_NOTE} ${log.dayNote?'Editar nota':'Agregar nota'}</span>
+      <span class="hc-status">${statusHtml}</span>
     </div>` : ''}
   </div>`;
 }
 // Groups habits by category (only categories that actually have habits show a
 // header) — skipped entirely if nobody uses categories, to avoid clutter.
+// Each group header collapses/expands its cards; collapsed ids persist in
+// state.settings.collapsedCats.
 function renderHoy(){
   const list = document.getElementById('hoyList');
   updateHoyLayoutButtons();
+  renderHoySummary(todayStr());
   if(state.habits.length===0){
     list.className = '';
     list.innerHTML = `<div class="empty-state">
@@ -855,10 +945,14 @@ function renderHoy(){
   list.className = '';
   list.innerHTML = orderedKeys.map(key=>{
     const cat = key==='none' ? NO_CATEGORY : categoryDef(key);
-    const cardsHtml = groups[key].map(h=>renderHabitCardHtml(h, t)).join('');
-    return `<div class="section-label" data-cat-group="${key}" style="display:flex; align-items:center; gap:7px;">
-      <span class="color-dot" style="width:9px; height:9px; border:none; background:${cat.color};"></span>${cat.icon} ${esc(cat.label).toUpperCase()}
-    </div><div class="${layoutClass}">${cardsHtml}</div>`;
+    const collapsed = isCatCollapsed(key);
+    const n = groups[key].length;
+    const head = `<div class="cat-group-head" data-cat-group="${key}" onclick="toggleCatGroup('${key}')">
+      <span class="cgh-ic">${cat.icon}</span><span class="cgh-name">${esc(cat.label)}</span>
+      ${collapsed?`<span class="cgh-count">${n} hábito${n===1?'':'s'}</span><span class="cgh-chev">${SVG_CHEV_DOWN}</span>`:''}
+    </div>`;
+    const cardsHtml = collapsed ? '' : `<div class="${layoutClass}">${groups[key].map(h=>renderHabitCardHtml(h, t)).join('')}</div>`;
+    return head + cardsHtml;
   }).join('');
 }
 
@@ -1075,7 +1169,7 @@ function svgBarChart(values, opts){
     const barH = Math.max(2, v.ratio*(h-16));
     const x = pad + i*(bw+pad);
     const y = h-16-barH;
-    const label = opts.showLabels ? `<text x="${(x+bw/2).toFixed(1)}" y="${h-4}" font-size="8" text-anchor="middle" style="fill:var(--ink-500); font-family:'IBM Plex Mono',monospace;">${esc(v.label)}</text>` : '';
+    const label = opts.showLabels ? `<text x="${(x+bw/2).toFixed(1)}" y="${h-4}" font-size="8" text-anchor="middle" style="fill:var(--ink-500); font-variant-numeric:tabular-nums;">${esc(v.label)}</text>` : '';
     return `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${bw.toFixed(1)}" height="${barH.toFixed(1)}" rx="3" style="fill:${opts.color||'var(--amber)'}"/>${label}`;
   }).join('');
   return `<svg class="chart-svg" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">${bars}</svg>`;
@@ -1837,6 +1931,11 @@ function renderCategoryInsightsHtml(){
 // Used by both the Avisos "Categorías" cards and OS push-notification taps
 // to jump to the right place instead of just opening the app at Hoy.
 function goToCategoryInHoy(categoryId){
+  // A collapsed group would hide the habits we're jumping to — expand it first.
+  if(state.settings && state.settings.collapsedCats){
+    const i = state.settings.collapsedCats.indexOf(categoryId);
+    if(i!==-1){ state.settings.collapsedCats.splice(i,1); saveState(); }
+  }
   goTo('hoy');
   setTimeout(()=>{
     const el = document.querySelector(`[data-cat-group="${categoryId}"]`);
@@ -2072,6 +2171,9 @@ function refreshCurrentView(){
 function setDateLine(){
   const d = new Date();
   document.getElementById('dateLine').textContent = d.toLocaleDateString('es-ES',{weekday:'long', day:'numeric', month:'long'});
+  const hr = d.getHours();
+  document.getElementById('greetLine').textContent =
+    hr<12 ? '¡Buenos días! 👋' : hr<19 ? '¡Buenas tardes! 👋' : '¡Buenas noches! 👋';
 }
 
 /* ---------------- Init ---------------- */
