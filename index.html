@@ -229,9 +229,7 @@
   .picker-row{display:flex; gap:10px; flex-wrap:wrap;}
   .icon-opt{ width:48px; height:48px; border-radius:12px; border:2px solid transparent; background:var(--paper-alt); font-size:22px; display:flex; align-items:center; justify-content:center; cursor:pointer; }
   .icon-opt.selected{border-color:var(--ink-900); background:var(--paper);}
-  .color-opt{ width:40px; height:40px; border-radius:50%; border:2px solid transparent; cursor:pointer; display:flex; align-items:center; justify-content:center; }
-  .color-opt.selected{border-color:var(--ink-900);}
-  .color-opt.selected::after{content:'✓'; color:#fff; font-size:16px;}
+  .color-dot{ width:22px; height:22px; border-radius:50%; flex-shrink:0; border:1px solid var(--rule); }
 
   .segmented{display:flex; border:1px solid var(--rule); border-radius:11px; overflow:hidden;}
   .seg-opt{flex:1; padding:12px 6px; min-height:44px; border:none; background:var(--paper); color:var(--ink-700); font-size:13.5px; font-family:'Inter',sans-serif; cursor:pointer; border-right:1px solid var(--rule);}
@@ -272,7 +270,7 @@
   .diary-note a{ color:var(--amber); text-decoration:underline; }
 
   /* ---------- Notifications ---------- */
-  .notif-card{ position:relative; background:var(--paper-alt); border:1px solid var(--rule); border-left:3px solid var(--rule); border-radius:var(--radius); padding:16px 42px 16px 18px; margin-bottom:13px; }
+  .notif-card{ position:relative; background:var(--paper-alt); border:1px solid var(--rule); border-left:3px solid var(--rule); border-radius:var(--radius); padding:16px 78px 16px 18px; margin-bottom:13px; }
   .notif-card .nc-head{display:flex; align-items:center; gap:9px; font-family:'Fraunces',serif; font-weight:600; font-size:16.5px; margin-bottom:5px;}
   .notif-card p{font-size:14.5px; color:var(--ink-500); line-height:1.55; margin:0;}
   .notif-card.streak{border-left-color:var(--amber);}
@@ -281,15 +279,17 @@
   .notif-card.suggestion{border-left-color:var(--moss);}
   .notif-card.reminder{border-left-color:#4C6B8A;}
   .notif-card .nc-action{margin-top:12px; display:inline-block; padding:10px 16px; min-height:40px;}
-  .notif-dismiss{ position:absolute; top:6px; right:6px; width:36px; height:36px; border-radius:50%; border:none; background:transparent; color:var(--ink-500); font-size:18px; line-height:1; cursor:pointer; display:flex; align-items:center; justify-content:center; }
-  .notif-dismiss:active{background:var(--rule);}
+  .notif-dismiss, .notif-snooze{ position:absolute; top:6px; width:36px; height:36px; border-radius:50%; border:none; background:transparent; color:var(--ink-500); font-size:16px; line-height:1; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+  .notif-dismiss{ right:6px; font-size:18px; }
+  .notif-snooze{ right:42px; }
+  .notif-dismiss:active, .notif-snooze:active{background:var(--rule);}
   .notif-card[onclick]{transition:opacity .1s ease;}
   .notif-card[onclick]:active{opacity:.65;}
   .cat-card:active{opacity:.7;}
 
-  .cat-card{ background:var(--paper-alt); border:1px solid var(--rule); border-radius:var(--radius); padding:16px 18px; margin-bottom:13px; }
+  .cat-card{ background:var(--paper-alt); border:1px solid var(--rule); border-left:3px solid var(--rule); border-radius:var(--radius); padding:16px 18px; margin-bottom:13px; }
   .cat-head{display:flex; align-items:center; gap:9px; margin-bottom:9px;}
-  .cat-ic{font-size:18px;}
+  .cat-ic{font-size:16px; width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0;}
   .cat-name{font-family:'Fraunces',serif; font-weight:600; font-size:16px; flex:1;}
   .cat-count{font-size:12.5px; color:var(--ink-500); font-family:'IBM Plex Mono',monospace;}
   .cat-bar{height:7px; border-radius:4px; background:var(--rule); overflow:hidden; margin-bottom:7px;}
@@ -495,15 +495,15 @@
     </div>
     <div class="field">
       <label>Categoría (opcional)</label>
-      <select id="f_category"></select>
+      <select id="f_category" onchange="onCategoryChange()"></select>
+      <div class="toggle-row" style="padding:10px 2px 0;">
+        <span class="color-dot" id="categoryColorDot"></span>
+        <div class="hint" style="margin:0;">El color del hábito se asigna automáticamente según la categoría.</div>
+      </div>
     </div>
     <div class="field">
       <label>Ícono</label>
       <div class="picker-row" id="iconPicker"></div>
-    </div>
-    <div class="field">
-      <label>Color</label>
-      <div class="picker-row" id="colorPicker"></div>
     </div>
     <div class="modal-actions">
       <div class="btn" onclick="closeHabitForm()">Cancelar</div>
@@ -552,22 +552,25 @@ const ICONS = [
   '👨‍👩‍👧','❤️','📞','💰','🎓','🗣️','🧹','🚶','🦷','💊','🩺','🎧',
   '🎹','🎤','📷','♟️','🐶','🌻','☕','📵','🛏️','🧴','🌳','🧾'
 ];
-const COLORS = [
-  '#E2933C','#52795F','#B5533F','#4C6B8A','#7A5C99','#2C8C8C',
-  '#C2571C','#8A6D3B','#3D6647','#5B7FA6','#9C4F6B','#2F4858','#A67C52','#7C9070'
-];
+// Colors are fixed per category (not chosen per habit) — every habit in a
+// category automatically inherits its color, so the palette stays consistent
+// and predictable instead of an arbitrary per-habit choice.
 const CATEGORY_CATALOG = [
-  { id:'spiritual', icon:'🙏', label:'Espiritual' },
-  { id:'health', icon:'💪', label:'Salud física' },
-  { id:'family', icon:'👨‍👩‍👧', label:'Familia' },
-  { id:'mind', icon:'🧘', label:'Mente y bienestar' },
-  { id:'work', icon:'💼', label:'Trabajo y estudio' },
-  { id:'finance', icon:'💰', label:'Finanzas' },
-  { id:'social', icon:'🤝', label:'Social' },
-  { id:'creativity', icon:'🎨', label:'Creatividad' },
-  { id:'home', icon:'🏠', label:'Hogar' },
+  { id:'spiritual', icon:'🙏', label:'Espiritual', color:'#7A5C99' },
+  { id:'health', icon:'💪', label:'Salud física', color:'#B5533F' },
+  { id:'family', icon:'👨‍👩‍👧', label:'Familia', color:'#9C4F6B' },
+  { id:'mind', icon:'🧘', label:'Mente y bienestar', color:'#2C8C8C' },
+  { id:'work', icon:'💼', label:'Trabajo y estudio', color:'#4C6B8A' },
+  { id:'finance', icon:'💰', label:'Finanzas', color:'#8A6D3B' },
+  { id:'social', icon:'🤝', label:'Social', color:'#C2571C' },
+  { id:'creativity', icon:'🎨', label:'Creatividad', color:'#E2933C' },
+  { id:'home', icon:'🏠', label:'Hogar', color:'#52795F' },
 ];
+const NO_CATEGORY = { id:'none', icon:'📌', label:'Sin categoría', color:'#2F4858' };
 function categoryDef(id){ return CATEGORY_CATALOG.find(c=>c.id===id) || null; }
+// The color a habit renders with: always its category's fixed color, falling
+// back to the neutral "sin categoría" color when it has none.
+function habitColor(h){ return (categoryDef(h.categoryId) || NO_CATEGORY).color; }
 const MILESTONES = [3,7,14,30,60,100,200,365];
 const MEDAL = {3:'🔥',7:'⭐',14:'🥉',30:'🥈',60:'🥇',100:'🏆',200:'💎',365:'👑'};
 const HABIT_CATEGORY_SUGGESTIONS = [
@@ -606,7 +609,6 @@ let currentHabitId = null;
 let calMonthOffset = 0;
 let editingHabitId = null;
 let selectedIcon = ICONS[5];
-let selectedColor = COLORS[0];
 let reminderRepeat = 'daily';
 let reminderCustomDays = [];
 let focusHabitId = null;
@@ -759,7 +761,7 @@ function renderHabitCardHtml(h, t){
   const rating = (log.value>0) ? computeRating(log.value, h.currentTarget) : null;
 
   return `
-  <div class="habit-card ${log.done?'done':''}" style="--hc:${h.color}">
+  <div class="habit-card ${log.done?'done':''}" style="--hc:${habitColor(h)}">
     <div class="hc-top">
       <div class="hc-id">
         <div class="hc-icon">${h.icon}</div>
@@ -788,7 +790,7 @@ function renderHabitCardHtml(h, t){
       <div class="timer-display ${running?'running':''}" data-timer-id="${h.id}">${formatMMSS(elapsedSec)}</div>
       ${running
         ? `<button class="timer-btn stop" onclick="stopTimer('${h.id}')">Detener</button>`
-        : `<button class="timer-btn start" style="background:${h.color}" onclick="startTimer('${h.id}')">Iniciar</button>`}
+        : `<button class="timer-btn start" style="background:${habitColor(h)}" onclick="startTimer('${h.id}')">Iniciar</button>`}
     </div>` : ''}
 
     ${rating ? `<div class="rating-badge ${rating.cls}"><span>${rating.label}</span><span>${rating.pct}% de la meta</span></div>` : ''}
@@ -803,7 +805,7 @@ function renderHabitCardHtml(h, t){
     ${pendingBump ? `
     <div class="bump-badge">
       <span>Nueva semana lista para subir</span>
-      <button onclick="confirmBump('${h.id}')" style="background:${h.color}">Subir a ${nextVal}</button>
+      <button onclick="confirmBump('${h.id}')" style="background:${habitColor(h)}">Subir a ${nextVal}</button>
     </div>` : ''}
   </div>`;
 }
@@ -840,9 +842,11 @@ function renderHoy(){
 
   list.className = '';
   list.innerHTML = orderedKeys.map(key=>{
-    const cat = key==='none' ? { icon:'📌', label:'Sin categoría' } : categoryDef(key);
+    const cat = key==='none' ? NO_CATEGORY : categoryDef(key);
     const cardsHtml = groups[key].map(h=>renderHabitCardHtml(h, t)).join('');
-    return `<div class="section-label" data-cat-group="${key}">${cat.icon} ${esc(cat.label).toUpperCase()}</div><div class="${layoutClass}">${cardsHtml}</div>`;
+    return `<div class="section-label" data-cat-group="${key}" style="display:flex; align-items:center; gap:7px;">
+      <span class="color-dot" style="width:9px; height:9px; border:none; background:${cat.color};"></span>${cat.icon} ${esc(cat.label).toUpperCase()}
+    </div><div class="${layoutClass}">${cardsHtml}</div>`;
   }).join('');
 }
 
@@ -956,7 +960,7 @@ function openFocus(id){
   focusHabitId = id;
   const h = state.habits.find(x=>x.id===id);
   const overlay = document.getElementById('focusOverlay');
-  overlay.style.setProperty('--hc', h.color);
+  overlay.style.setProperty('--hc', habitColor(h));
   document.getElementById('focusIcon').textContent = h.icon;
   document.getElementById('focusName').textContent = h.name;
   document.getElementById('focusNote').value = '';
@@ -1008,7 +1012,7 @@ function renderHabitos(){
     const reminder = reminderSummary(h);
     return `
     <div class="habit-row" onclick="openDetail('${h.id}')">
-      <div class="hc-icon" style="--hc:${h.color}; width:36px; height:36px; font-size:16px;">${h.icon}</div>
+      <div class="hc-icon" style="--hc:${habitColor(h)}; width:36px; height:36px; font-size:16px;">${h.icon}</div>
       <div style="flex:1">
         <div class="name">${esc(h.name)}${cat?` <span class="cat-chip">${cat.icon} ${esc(cat.label)}</span>`:''}</div>
         <div class="meta">${h.currentTarget} ${esc(h.unit)} · +${h.increment}/sem · ${h.autoIncrement?'auto':'manual'} ${streak>0?'· 🔥 '+streak:''}${reminder?' · '+reminder:''}</div>
@@ -1094,7 +1098,7 @@ function renderDetail(){
   const steps = h.weekHistory.map(w=>{
     const heightPct = Math.max(6, (w.value/maxVal)*100);
     const isCurrent = w.week === wIdx;
-    return `<div class="step ${isCurrent?'current':''}" style="--hc:${h.color}">
+    return `<div class="step ${isCurrent?'current':''}" style="--hc:${habitColor(h)}">
       <div class="val">${w.value}</div>
       <div class="bar" style="height:${heightPct}%"></div>
       <div class="wk">S${w.week+1}</div>
@@ -1113,7 +1117,7 @@ function renderDetail(){
   const detailReminder = reminderSummary(h);
   document.getElementById('detalleContent').innerHTML = `
     <div class="detail-head">
-      <div class="detail-icon" style="--hc:${h.color}">${h.icon}</div>
+      <div class="detail-icon" style="--hc:${habitColor(h)}">${h.icon}</div>
       <div>
         <div class="detail-title">${esc(h.name)}</div>
       </div>
@@ -1121,7 +1125,7 @@ function renderDetail(){
     <div class="detail-sub">${h.currentTarget} ${esc(h.unit)} actuales · sube ${h.increment} ${esc(h.unit)}/semana (${h.autoIncrement?'automático':'manual'})</div>
     ${(detailCat || detailReminder) ? `<div class="detail-sub" style="margin-top:-14px;">${[detailCat?`${detailCat.icon} ${esc(detailCat.label)}`:'', detailReminder].filter(Boolean).join(' · ')}</div>` : ''}
 
-    <div class="stat-row" style="--hc:${h.color}">
+    <div class="stat-row" style="--hc:${habitColor(h)}">
       <div class="stat-box"><div class="n">${streak}</div><div class="l">Racha actual</div></div>
       <div class="stat-box"><div class="n">${h.bestStreak||0}</div><div class="l">Mejor racha</div></div>
       <div class="stat-box"><div class="n">${totalDone}</div><div class="l">Días con progreso</div></div>
@@ -1138,7 +1142,7 @@ function renderDetail(){
       <div class="lbl" id="calLabel"></div>
       <button onclick="calMonthOffset++; renderDetail();">›</button>
     </div>
-    <div class="cal-grid" id="calGrid" style="--hc:${h.color}"></div>
+    <div class="cal-grid" id="calGrid" style="--hc:${habitColor(h)}"></div>
 
     ${diary.length ? `
     <div class="section-label">Diario</div>
@@ -1268,7 +1272,7 @@ function renderCalDayList(){
     const wIdx = weekIndexFor(h, dStr);
     const target = targetForWeek(h, wIdx);
     return `<div class="cal-day-item">
-      <div class="cdi-icon" style="--hc:${h.color}">${h.icon}</div>
+      <div class="cdi-icon" style="--hc:${habitColor(h)}">${h.icon}</div>
       <div>
         <div class="cdi-name">${esc(h.name)}</div>
         <div class="cdi-meta">${log.value||0} / ${target} ${esc(h.unit)}</div>
@@ -1288,14 +1292,19 @@ function buildUnitOptions(){
 function buildPickers(){
   document.getElementById('iconPicker').innerHTML = ICONS.map(i=>
     `<div class="icon-opt ${i===selectedIcon?'selected':''}" onclick="pickIcon('${i}')">${i}</div>`).join('');
-  document.getElementById('colorPicker').innerHTML = COLORS.map(c=>
-    `<div class="color-opt ${c===selectedColor?'selected':''}" style="background:${c}" onclick="pickColor('${c}')"></div>`).join('');
 }
 function pickIcon(i){ selectedIcon=i; buildPickers(); }
-function pickColor(c){ selectedColor=c; buildPickers(); }
 function buildCategoryOptions(){
   document.getElementById('f_category').innerHTML = `<option value="">Sin categoría</option>` +
     CATEGORY_CATALOG.map(c=>`<option value="${c.id}">${c.icon} ${c.label}</option>`).join('');
+}
+// Updates the read-only color swatch in the habit form to match the color the
+// selected category will automatically apply.
+function onCategoryChange(){
+  const id = document.getElementById('f_category').value;
+  const color = (categoryDef(id) || NO_CATEGORY).color;
+  const dot = document.getElementById('categoryColorDot');
+  if(dot) dot.style.background = color;
 }
 
 /* ---------------- Reminder recurrence (daily / weekdays / custom days) ---------------- */
@@ -1338,7 +1347,7 @@ function openHabitForm(id){
     document.getElementById('f_auto').classList.toggle('on', h.autoIncrement);
     document.getElementById('f_reminder').value = h.reminderTime || '';
     document.getElementById('f_category').value = h.categoryId || '';
-    selectedIcon = h.icon; selectedColor = h.color;
+    selectedIcon = h.icon;
     if(h.reminderTime){
       if(!h.reminderDays || h.reminderDays.length===7) reminderRepeat = 'daily';
       else if(h.reminderDays.length===5 && [1,2,3,4,5].every(d=>h.reminderDays.includes(d))) reminderRepeat = 'weekdays';
@@ -1356,11 +1365,12 @@ function openHabitForm(id){
     document.getElementById('f_auto').classList.remove('on');
     document.getElementById('f_reminder').value = '';
     document.getElementById('f_category').value = '';
-    selectedIcon = ICONS[5]; selectedColor = COLORS[0];
+    selectedIcon = ICONS[5];
     reminderRepeat = 'daily'; reminderCustomDays = [];
   }
   setReminderRepeat(reminderRepeat);
   onReminderTimeChange();
+  onCategoryChange();
   buildPickers();
   overlay.classList.add('show');
 }
@@ -1416,7 +1426,7 @@ function saveHabitForm(){
     const h = state.habits.find(x=>x.id===editingHabitId);
     h.name = name; h.unit = unit.label; h.unitId = unit.id; h.unitType = unit.type; h.increment = increment;
     h.autoIncrement = auto; h.reminderTime = reminder; h.reminderDays = reminderDays;
-    h.icon = selectedIcon; h.color = selectedColor; h.categoryId = categoryId;
+    h.icon = selectedIcon; h.categoryId = categoryId;
   } else {
     const id = 'h_'+Date.now();
     state.habits.push({
@@ -1427,7 +1437,6 @@ function saveHabitForm(){
       reminderTime: reminder,
       reminderDays,
       icon: selectedIcon,
-      color: selectedColor,
       categoryId,
       createdAt: todayStr(),
       currentTarget: start,
@@ -1472,11 +1481,48 @@ async function registerSW(){
   catch(e){ return null; }
 }
 // Tapping a push notification posts back here (see sw.js notificationclick)
-// so an already-open tab jumps straight to the relevant habit.
+// so an already-open tab jumps straight to the relevant habit. A push that
+// merely *arrives* (tap or not) also posts 'reminder-fired' so an open tab
+// reflects it in Avisos immediately instead of waiting for the next reload.
 if('serviceWorker' in navigator){
   navigator.serviceWorker.addEventListener('message', (e)=>{
-    if(e.data && e.data.type==='open-habit' && e.data.habitId) openHabitFromExternal(e.data.habitId);
+    if(!e.data) return;
+    if(e.data.type==='open-habit' && e.data.habitId) openHabitFromExternal(e.data.habitId);
+    if(e.data.type==='reminder-fired') drainFiredReminders();
   });
+}
+// Mailbox the service worker writes to on push (sw.js has no localStorage
+// access), drained here so a reminder that fired while the app was fully
+// closed still shows up under Avisos > Recordatorios once it's opened again.
+function openNotifDB(){
+  return new Promise((resolve,reject)=>{
+    if(!('indexedDB' in window)){ reject(new Error('no indexedDB')); return; }
+    const req = indexedDB.open('escalon-notify', 1);
+    req.onupgradeneeded = ()=> req.result.createObjectStore('fired', { keyPath:'key' });
+    req.onsuccess = ()=> resolve(req.result);
+    req.onerror = ()=> reject(req.error);
+  });
+}
+async function drainFiredReminders(){
+  try{
+    const db = await openNotifDB();
+    const tx = db.transaction('fired', 'readwrite');
+    const store = tx.objectStore('fired');
+    const records = await new Promise((resolve,reject)=>{
+      const r = store.getAll();
+      r.onsuccess = ()=>resolve(r.result);
+      r.onerror = ()=>reject(r.error);
+    });
+    if(records.length){
+      state.remindersFired = state.remindersFired || {};
+      records.forEach(rec=>{ state.remindersFired[rec.habitId] = rec.date; });
+      store.clear();
+      saveState();
+      updateNotifBadge();
+      if(document.getElementById('view-notificaciones').classList.contains('active')) renderNotificaciones();
+    }
+    db.close();
+  }catch(e){}
 }
 function openHabitFromExternal(habitId){
   if(!state.habits.some(h=>h.id===habitId)) return;
@@ -1691,14 +1737,33 @@ function isDismissed(id){ pruneDismissed(); return state.dismissed.ids.includes(
 function dismissNotif(id){
   pruneDismissed();
   if(!state.dismissed.ids.includes(id)) state.dismissed.ids.push(id);
+  if(state.snoozed) delete state.snoozed[id];
   saveState();
   renderNotificaciones();
+}
+// Snoozing hides an item for a few hours instead of for the rest of the day —
+// it reappears on its own once the snooze expires, the next time Avisos (or
+// the badge) is recomputed, with no background timer needed.
+function isSnoozed(id){
+  if(!state.snoozed) return false;
+  const until = state.snoozed[id];
+  if(!until) return false;
+  if(until <= Date.now()){ delete state.snoozed[id]; return false; }
+  return true;
+}
+function snoozeNotif(id, hours){
+  state.snoozed = state.snoozed || {};
+  state.snoozed[id] = Date.now() + hours*3600*1000;
+  saveState();
+  renderNotificaciones();
+  showToast(`Pospuesto ${hours===1?'1 hora':hours+' horas'}`);
 }
 function clearAllNotifs(){
   const items = buildNotifItems();
   pruneDismissed();
   const allIds = [...items.streaks, ...items.missed, ...items.forgotten, ...items.suggestions, ...items.reminders].map(x=>x.id);
   state.dismissed.ids = Array.from(new Set([...state.dismissed.ids, ...allIds]));
+  if(state.snoozed) allIds.forEach(id=>delete state.snoozed[id]);
   saveState();
   renderNotificaciones();
   showToast('Notificaciones limpiadas');
@@ -1713,7 +1778,12 @@ function buildNotifItems(){
   const forgotten = state.habits.map(h=>({ id:`forgotten_${h.id}_${t}`, h, days:daysSinceLastProgress(h) }))
     .filter(x=>x.days>=3).sort((a,b)=>b.days-a.days);
   const suggestions = generateRecommendations().map((r,i)=>({ id:`sugg_${i}_${t}`, ...r }));
-  const reminders = state.habits.filter(h=>h.reminderTime).map(h=>({ id:`remind_${h.id}_${t}`, h }));
+  // Reminders only appear once the server-side cron has actually pushed them today
+  // (state.remindersFired, filled by drainFiredReminders) — not just because the
+  // habit has a reminder time configured.
+  const remindersFired = state.remindersFired || {};
+  const reminders = state.habits.filter(h=>h.reminderTime && remindersFired[h.id]===t)
+    .map(h=>({ id:`remind_${h.id}_${t}`, h }));
   return { streaks, missed, forgotten, suggestions, reminders };
 }
 // Aggregate stats per category catalog entry (plus "sin categoría"), used by the
@@ -1726,7 +1796,7 @@ function computeCategoryInsights(){
     (byCat[key] = byCat[key] || []).push(h);
   });
   return Object.keys(byCat).map(key=>{
-    const cat = categoryDef(key) || { id:'none', icon:'📌', label:'Sin categoría' };
+    const cat = categoryDef(key) || NO_CATEGORY;
     const habits = byCat[key];
     let doneDays = 0, totalDays = 0, streakSum = 0;
     habits.forEach(h=>{
@@ -1746,9 +1816,9 @@ function renderCategoryInsightsHtml(){
   const insights = computeCategoryInsights();
   if(!insights.length) return '';
   return '<div class="section-label">Categorías</div>' + insights.map(x=>`
-    <div class="cat-card" onclick="goToCategoryInHoy('${x.cat.id}')" style="cursor:pointer;">
-      <div class="cat-head"><span class="cat-ic">${x.cat.icon}</span><span class="cat-name">${esc(x.cat.label)}</span><span class="cat-count">${x.count} hábito${x.count===1?'':'s'}</span></div>
-      <div class="cat-bar"><div class="cat-bar-fill" style="width:${x.rate}%"></div></div>
+    <div class="cat-card" onclick="goToCategoryInHoy('${x.cat.id}')" style="cursor:pointer; border-left-color:${x.cat.color};">
+      <div class="cat-head"><span class="cat-ic" style="background:color-mix(in srgb, ${x.cat.color} 24%, var(--paper-alt));">${x.cat.icon}</span><span class="cat-name">${esc(x.cat.label)}</span><span class="cat-count">${x.count} hábito${x.count===1?'':'s'}</span></div>
+      <div class="cat-bar"><div class="cat-bar-fill" style="width:${x.rate}%; background:${x.cat.color};"></div></div>
       <div class="cat-meta">${x.rate}% cumplimiento (30d) · racha prom. ${x.avgStreak}</div>
     </div>`).join('');
 }
@@ -1765,10 +1835,13 @@ function updateNotifBadge(){
   const dot = document.getElementById('notifDot');
   if(!dot) return;
   const items = buildNotifItems();
-  const urgent = [...items.missed, ...items.forgotten].some(x=>!isDismissed(x.id));
+  const urgent = [...items.missed, ...items.forgotten, ...items.reminders].some(x=>!isDismissed(x.id) && !isSnoozed(x.id));
   dot.classList.toggle('show', state.habits.length>0 && urgent);
 }
-function dismissBtn(id){ return `<button class="notif-dismiss" onclick="event.stopPropagation(); dismissNotif('${id}')" aria-label="Descartar">×</button>`; }
+function notifActions(id){
+  return `<button class="notif-snooze" onclick="event.stopPropagation(); snoozeNotif('${id}', 3)" aria-label="Posponer 3 horas">⏰</button>
+    <button class="notif-dismiss" onclick="event.stopPropagation(); dismissNotif('${id}')" aria-label="Descartar">×</button>`;
+}
 function renderNotificaciones(){
   const wrap = document.getElementById('notifContent');
   if(!state.habits.length){
@@ -1776,11 +1849,12 @@ function renderNotificaciones(){
     return;
   }
   const raw = buildNotifItems();
-  const streakItems = raw.streaks.filter(x=>!isDismissed(x.id));
-  const pendingToday = raw.missed.filter(x=>!isDismissed(x.id));
-  const forgotten = raw.forgotten.filter(x=>!isDismissed(x.id));
-  const recs = raw.suggestions.filter(x=>!isDismissed(x.id));
-  const reminderItems = raw.reminders.filter(x=>!isDismissed(x.id));
+  const notSnoozedOrDismissed = x=>!isDismissed(x.id) && !isSnoozed(x.id);
+  const streakItems = raw.streaks.filter(notSnoozedOrDismissed);
+  const pendingToday = raw.missed.filter(notSnoozedOrDismissed);
+  const forgotten = raw.forgotten.filter(notSnoozedOrDismissed);
+  const recs = raw.suggestions.filter(notSnoozedOrDismissed);
+  const reminderItems = raw.reminders.filter(notSnoozedOrDismissed);
 
   let html = renderCategoryInsightsHtml();
   html += '<div class="section-label">Rachas</div>';
@@ -1793,7 +1867,7 @@ function renderNotificaciones(){
       const next = MILESTONES.find(m=>m>streak);
       const msg = next ? `Te faltan ${next-streak} día(s) para ${MEDAL[next]} ${next}.` : '¡Racha máxima alcanzada!';
       return `<div class="notif-card streak" onclick="openDetail('${h.id}')" style="cursor:pointer;">
-        ${dismissBtn(id)}
+        ${notifActions(id)}
         <div class="nc-head"><span>🔥</span>${esc(h.name)} · ${streak} día(s)</div>
         <p>${msg}</p>
       </div>`;
@@ -1808,7 +1882,7 @@ function renderNotificaciones(){
   } else {
     html += pendingToday.map(({id,h})=>`
       <div class="notif-card missed" onclick="openDetail('${h.id}')" style="cursor:pointer;">
-        ${dismissBtn(id)}
+        ${notifActions(id)}
         <div class="nc-head"><span>${h.icon}</span>${esc(h.name)}</div>
         <p>Todavía no registras nada hoy. Meta: ${h.currentTarget} ${esc(h.unit)}.</p>
       </div>`).join('');
@@ -1822,7 +1896,7 @@ function renderNotificaciones(){
   } else {
     html += forgotten.map(({id,h,days})=>`
       <div class="notif-card forgotten" onclick="openDetail('${h.id}')" style="cursor:pointer;">
-        ${dismissBtn(id)}
+        ${notifActions(id)}
         <div class="nc-head"><span>${h.icon}</span>${esc(h.name)}</div>
         <p>Sin progreso hace ${days} días. ¿Lo retomamos?</p>
       </div>`).join('');
@@ -1836,7 +1910,7 @@ function renderNotificaciones(){
   } else {
     html += recs.map(({id,icon,title,text,action,actionLabel,habitId})=>`
       <div class="notif-card suggestion" ${habitId ? `onclick="openDetail('${habitId}')" style="cursor:pointer;"` : ''}>
-        ${dismissBtn(id)}
+        ${notifActions(id)}
         <div class="nc-head"><span>${icon}</span>${esc(title)}</div>
         <p>${esc(text)}</p>
         ${action ? `<div class="btn primary nc-action" onclick="event.stopPropagation(); ${action}">${esc(actionLabel)}</div>` : ''}
@@ -1844,14 +1918,17 @@ function renderNotificaciones(){
   }
 
   html += '<div class="section-label">Recordatorios</div>';
-  if(raw.reminders.length===0){
-    html += `<div class="notif-card"><p>No tienes recordatorios activos. Configúralos al crear o editar un hábito.</p></div>`;
+  const anyReminderConfigured = state.habits.some(h=>h.reminderTime);
+  if(!anyReminderConfigured){
+    html += `<div class="notif-card"><p>No tienes recordatorios configurados. Configúralos al crear o editar un hábito.</p></div>`;
+  } else if(raw.reminders.length===0){
+    html += `<div class="notif-card"><p>Aún no se ha enviado ningún recordatorio hoy.</p></div>`;
   } else if(reminderItems.length===0){
     html += `<div class="notif-card"><p>Ya revisaste tus recordatorios de hoy.</p></div>`;
   } else {
     html += reminderItems.map(({id,h})=>`
       <div class="notif-card reminder" onclick="openDetail('${h.id}')" style="cursor:pointer;">
-        ${dismissBtn(id)}
+        ${notifActions(id)}
         <div class="nc-head"><span>${h.icon}</span>${esc(h.name)}</div>
         <p>${reminderSummary(h)}</p>
       </div>`).join('');
@@ -1949,6 +2026,7 @@ function prefillHabitSuggestion(icon, name, unitId){
    sync (syncPush). */
 document.addEventListener('visibilitychange', ()=>{
   if(!document.hidden){
+    drainFiredReminders();
     reconcileAll(); refreshCurrentView(); syncPush();
     // Wake locks are released by the OS when the tab is hidden; re-acquire if a timer is still running.
     if(state.habits.some(h=>h.timerStart)) requestWakeLock();
@@ -1990,6 +2068,7 @@ reconcileAll();
 renderHoy();
 document.getElementById('fabAdd').style.display = 'none';
 registerSW();
+drainFiredReminders();
 checkAuth();
 if('storage' in navigator && 'persist' in navigator.storage){
   navigator.storage.persist().catch(()=>{});
