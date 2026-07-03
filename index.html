@@ -257,6 +257,25 @@
   .settings-card button:active{transform:scale(.98); opacity:.85;}
   .settings-card button:disabled{opacity:.5; cursor:default;}
   .settings-card button.secondary{background:transparent; color:var(--danger); border:1px solid #E3C3BB;}
+  .sync-status{ display:flex; align-items:center; gap:8px; font-size:14px; font-weight:600; color:var(--ink-700); margin:0 0 10px; }
+  .sync-dot{ width:9px; height:9px; border-radius:50%; background:var(--ink-500); flex:none; }
+  .sync-dot.ok{background:var(--moss);}
+  .sync-dot.pending, .sync-dot.offline{background:var(--amber);}
+  .sync-dot.error{background:var(--danger);}
+  .sync-dot.syncing{ background:var(--amber); animation:syncPulse 1s ease-in-out infinite; }
+  @keyframes syncPulse{ 0%,100%{opacity:1; transform:scale(1)} 50%{opacity:.35; transform:scale(.7)} }
+  .sync-progress{ height:4px; border-radius:2px; background:var(--rule); overflow:hidden; margin:0 0 12px; opacity:0; transition:opacity .25s ease; }
+  .sync-progress.active{opacity:1;}
+  .sync-progress-fill{ height:100%; width:0%; border-radius:2px; background:linear-gradient(90deg, var(--amber), var(--moss)); transition:width .35s ease; }
+  .sync-devices{ margin:2px 0 14px; }
+  .sync-devices .sync-devices-label{ font-size:12.5px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-500); font-weight:700; margin:0 0 4px; }
+  .sync-device{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding:9px 0; border-bottom:1px solid var(--rule); }
+  .sync-device:last-child{border-bottom:none;}
+  .sync-device .dev-name{ font-size:13.5px; font-weight:700; color:var(--ink-900); }
+  .sync-device .dev-meta{ font-size:12.5px; color:var(--ink-500); margin-top:2px; }
+  .dev-state{ flex:none; font-size:11.5px; font-weight:700; padding:3px 9px; border-radius:99px; background:var(--rule); color:var(--ink-700); }
+  .dev-state.current{ background:var(--excellent-bg); color:var(--excellent-text); }
+  .dev-state.stale{ background:var(--low-bg); color:var(--low-text); }
   .note{ font-size:13.5px; color:var(--ink-500); line-height:1.6; padding:15px; background:var(--paper-alt); border-left:3px solid var(--amber); border-radius:6px; margin-bottom:16px; }
   #toast{ position:fixed; bottom:calc(122px + var(--safe-bottom)); left:50%; transform:translateX(-50%); background:var(--glass-bar-bg); backdrop-filter:blur(24px) saturate(1.8); -webkit-backdrop-filter:blur(24px) saturate(1.8); border:1px solid var(--glass-bar-border); box-shadow:0 6px 20px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.08); color:var(--bar-text); padding:12px 20px; border-radius:20px; font-size:14.5px; opacity:0; transition:opacity .25s; z-index:60; pointer-events:none; max-width:80%; text-align:center; }
   #toast.show{opacity:1;}
@@ -427,7 +446,7 @@
       <div class="section-label">Ajustes</div>
       <div class="settings-card">
         <h3>Cuenta y sincronización</h3>
-        <p>Sin cuenta, Escalón funciona igual y todo se queda en este teléfono. Si creas una cuenta, tus hábitos se guardan también en el servidor para que puedas abrir la misma cuenta desde otro dispositivo.</p>
+        <p>Sin cuenta, Escalón funciona igual y todo se queda en este teléfono. Si creas una cuenta, cada cambio que hagas se guarda automáticamente en ella y se sincroniza entre tus dispositivos.</p>
         <div id="accountLoggedOut">
           <div class="field"><label>Correo</label><input type="email" id="acc_email" placeholder="tu@correo.com"></div>
           <div class="field"><label>Contraseña</label><input type="password" id="acc_password" placeholder="Mínimo 8 caracteres"></div>
@@ -438,7 +457,10 @@
         </div>
         <div id="accountLoggedIn" style="display:none;">
           <p id="accountEmailLine" style="color:var(--ink-900); font-weight:600; font-size:15px; margin:0 0 12px;"></p>
-          <button onclick="syncNow()">Sincronizar ahora</button>
+          <div class="sync-status"><span class="sync-dot" id="syncDot"></span><span id="syncStatusText">—</span></div>
+          <div class="sync-progress" id="syncProgress"><div class="sync-progress-fill" id="syncProgressFill"></div></div>
+          <div class="sync-devices" id="syncDevices" style="display:none;"></div>
+          <button onclick="syncNow()" id="syncNowBtn">Sincronizar ahora</button>
           <button class="secondary" onclick="logoutAccount()" style="margin-top:8px;">Cerrar sesión</button>
         </div>
       </div>
@@ -638,6 +660,8 @@ let focusHabitId = null;
 let wakeLock = null;
 let authState = { authenticated:false, email:null };
 let syncDebounceTimer = null;
+let applyingRemoteState = false;
+let habitJsonCache = null;
 let globalCalMonthOffset = 0;
 let globalCalSelectedDate = null;
 
@@ -661,12 +685,26 @@ function loadState(){
   }catch(e){}
   return { habits: [] };
 }
+// Per-habit change stamps: on every save, any habit whose serialized form (minus
+// the stamp itself) differs from the last snapshot gets updatedAt = now. These
+// stamps are what lets two devices merge instead of overwriting each other.
+// (habitJsonCache is declared with the other top-level state above, since the
+// boot-time migrateUnits() call reaches here before this section executes.)
+function stampChangedHabits(){
+  const isBaseline = !habitJsonCache; // first run just records the snapshot
+  const next = new Map();
+  const now = Date.now();
+  state.habits.forEach(h=>{
+    const j = JSON.stringify({ ...h, updatedAt: undefined });
+    if(!isBaseline && habitJsonCache.get(h.id) !== j) h.updatedAt = now;
+    next.set(h.id, j);
+  });
+  habitJsonCache = next;
+}
 function saveState(){
+  stampChangedHabits();
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  if(authState.authenticated){
-    clearTimeout(syncDebounceTimer);
-    syncDebounceTimer = setTimeout(pushServerState, 1500);
-  }
+  if(authState.authenticated && !applyingRemoteState) scheduleSync();
   updateNotifBadge();
 }
 
@@ -1584,6 +1622,9 @@ function saveHabitForm(){
 function deleteHabit(id){
   if(!confirm('¿Eliminar este hábito y todo su historial?')) return;
   state.habits = state.habits.filter(x=>x.id!==id);
+  // tombstone: without it, a sync merge would resurrect the habit from another device
+  state.deleted = state.deleted || {};
+  state.deleted[id] = Date.now();
   saveState();
   goTo('habitos');
   syncPush();
@@ -1730,7 +1771,239 @@ async function renderAjustes(){
   renderAccountUI();
 }
 
-/* ---------------- Account / cross-device sync (optional, local-first) ---------------- */
+/* ---------------- Account / cross-device sync (optional, local-first) ----------------
+   Every saveState() while signed in queues a push. Pushes carry the last server
+   revision this device integrated (baseRev); if another device wrote in between
+   the server answers 409 with its copy, and the two states merge habit-by-habit
+   using each habit's updatedAt stamp (deletions win via tombstones). Pulls run
+   at startup, on tab focus and on demand, so every device converges on the
+   newest data, and the server keeps a per-device registry (name, last sync,
+   last revision) that Ajustes shows so you can tell which device is current. */
+const SYNC_STORE_KEY = 'escalon_sync_v1';
+const DEVICE_ID_KEY = 'escalon_device_id';
+let sync = loadSyncStore();
+let syncUiStatus = 'idle';
+let syncInFlight = false;
+let syncQueued = false;
+let syncRetryTimer = null;
+let syncRetryDelay = 5000;
+let remoteDevices = null;
+let remoteRev = 0;
+
+function loadSyncStore(){
+  try{ const raw = localStorage.getItem(SYNC_STORE_KEY); if(raw) return JSON.parse(raw); }catch(e){}
+  return { lastRev: 0, lastSyncAt: null, dirty: false };
+}
+function saveSyncStore(){ localStorage.setItem(SYNC_STORE_KEY, JSON.stringify(sync)); }
+function getDeviceId(){
+  let id = localStorage.getItem(DEVICE_ID_KEY);
+  if(!id){
+    id = Date.now().toString(16) + Math.random().toString(16).slice(2, 10);
+    localStorage.setItem(DEVICE_ID_KEY, id);
+  }
+  return id;
+}
+function getDeviceName(){
+  const ua = navigator.userAgent;
+  const os = /iPhone/.test(ua) ? 'iPhone' : /iPad/.test(ua) ? 'iPad' : /Android/.test(ua) ? 'Android'
+    : /Mac/.test(ua) ? 'Mac' : /Windows/.test(ua) ? 'Windows' : 'Dispositivo';
+  const installed = matchMedia('(display-mode: standalone)').matches;
+  return os + (installed ? ' · App' : ' · Navegador');
+}
+
+// Habit-level merge: for each id present on either side the copy with the newer
+// updatedAt stamp wins; a tombstone newer than the habit's last edit removes it.
+function mergeStates(local, remote){
+  const deleted = {};
+  [remote.deleted || {}, local.deleted || {}].forEach(src=>{
+    for(const id in src){ deleted[id] = Math.max(deleted[id] || 0, src[id]); }
+  });
+  // drop tombstones older than ~6 months; nothing left to protect against
+  const cutoff = Date.now() - 1000*60*60*24*180;
+  for(const id in deleted){ if(deleted[id] < cutoff) delete deleted[id]; }
+  const byId = new Map();
+  (remote.habits || []).forEach(h=>byId.set(h.id, h));
+  (local.habits || []).forEach(h=>{
+    const other = byId.get(h.id);
+    if(!other || (h.updatedAt || 0) >= (other.updatedAt || 0)) byId.set(h.id, h);
+  });
+  const habits = [...byId.values()].filter(h=>!(deleted[h.id] && deleted[h.id] >= (h.updatedAt || 0)));
+  return { habits, deleted };
+}
+
+// Swap in a state that came from (or was merged with) the server. saveState runs
+// inside migrateUnits/reconcileAll; applyingRemoteState keeps those saves from
+// re-queueing the push that likely triggered this adoption.
+function adoptState(next){
+  applyingRemoteState = true;
+  state = next;
+  habitJsonCache = null; // rebuild the change-stamp baseline from the adopted copy
+  migrateUnits();
+  reconcileAll();
+  applyingRemoteState = false;
+  refreshCurrentView();
+}
+
+function scheduleSync(){
+  sync.dirty = true;
+  saveSyncStore();
+  setSyncStatus('pending');
+  clearTimeout(syncDebounceTimer);
+  syncDebounceTimer = setTimeout(()=>runSync('push'), 1200);
+}
+function scheduleSyncRetry(){
+  clearTimeout(syncRetryTimer);
+  syncRetryTimer = setTimeout(()=>runSync('retry'), syncRetryDelay);
+  syncRetryDelay = Math.min(syncRetryDelay * 2, 120000);
+}
+
+async function fetchServerState(){
+  const res = await fetch('/api/sync?deviceId=' + encodeURIComponent(getDeviceId()) +
+    '&deviceName=' + encodeURIComponent(getDeviceName()));
+  if(res.status === 401){ handleSessionExpired(); return null; }
+  if(!res.ok) throw new Error('http ' + res.status);
+  return res.json();
+}
+function handleSessionExpired(){
+  authState = { authenticated:false, email:null };
+  setSyncProgress(null);
+  renderAccountUI();
+}
+
+async function runSync(reason){
+  if(!authState.authenticated || syncInFlight){ syncQueued = syncInFlight; return; }
+  syncInFlight = true;
+  clearTimeout(syncRetryTimer);
+  clearTimeout(syncDebounceTimer);
+  setSyncStatus('syncing');
+  setSyncProgress(12);
+  try{
+    // Pull when we might be behind: at startup/focus, on demand, or whenever we
+    // don't have local edits waiting (a dirty push discovers staleness via 409).
+    if(!sync.dirty || reason === 'pull' || reason === 'manual'){
+      const remote = await fetchServerState();
+      if(!authState.authenticated) return;
+      if(remote && typeof remote.rev === 'number'){
+        remoteDevices = remote.devices || remoteDevices;
+        remoteRev = remote.rev;
+        if(remote.rev > sync.lastRev && remote.state && Array.isArray(remote.state.habits)){
+          adoptState(sync.dirty ? mergeStates(state, remote.state) : remote.state);
+        }
+        sync.lastRev = Math.max(sync.lastRev, remote.rev);
+      }
+    }
+    setSyncProgress(45);
+    let attempts = 0;
+    while(sync.dirty){
+      setSyncProgress(65);
+      const res = await fetch('/api/sync', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ state, baseRev: sync.lastRev, deviceId: getDeviceId(), deviceName: getDeviceName() })
+      });
+      if(res.status === 401){ handleSessionExpired(); return; }
+      if(res.status === 409){
+        if(++attempts > 3) throw new Error('conflicto persistente');
+        const remote = await res.json();
+        remoteDevices = remote.devices || remoteDevices;
+        remoteRev = remote.rev;
+        adoptState(mergeStates(state, (remote.state && Array.isArray(remote.state.habits)) ? remote.state : { habits: [] }));
+        sync.lastRev = remote.rev;
+        continue; // retry the push with the merged state and fresh baseRev
+      }
+      if(!res.ok) throw new Error('http ' + res.status);
+      const data = await res.json();
+      sync.lastRev = data.rev;
+      sync.dirty = false;
+      remoteDevices = data.devices || remoteDevices;
+      remoteRev = data.rev;
+    }
+    setSyncProgress(100);
+    sync.lastSyncAt = Date.now();
+    syncRetryDelay = 5000;
+    setSyncStatus('ok');
+    setTimeout(()=>setSyncProgress(null), 600);
+  }catch(e){
+    setSyncProgress(null);
+    setSyncStatus(navigator.onLine === false ? 'offline' : 'error');
+    scheduleSyncRetry();
+  }finally{
+    syncInFlight = false;
+    saveSyncStore();
+    if(syncQueued){ syncQueued = false; runSync('push'); }
+  }
+}
+
+async function syncNow(){
+  if(!authState.authenticated){ showToast('Inicia sesión primero'); return; }
+  await runSync('manual');
+  if(syncUiStatus === 'ok') showToast('Todo sincronizado');
+  else if(syncUiStatus === 'offline') showToast('Sin conexión — se sincronizará al volver');
+}
+
+/* ---- Sync UI (status line, progress bar, device list in Ajustes) ---- */
+function setSyncStatus(status){
+  syncUiStatus = status;
+  renderSyncUI();
+}
+function setSyncProgress(pct){
+  const bar = document.getElementById('syncProgress');
+  const fill = document.getElementById('syncProgressFill');
+  if(!bar || !fill) return;
+  if(pct == null){ bar.classList.remove('active'); fill.style.width = '0%'; return; }
+  bar.classList.add('active');
+  fill.style.width = pct + '%';
+}
+function timeAgo(ts){
+  if(!ts) return '';
+  const s = Math.round((Date.now() - ts) / 1000);
+  if(s < 45) return 'justo ahora';
+  if(s < 3600) return 'hace ' + Math.max(1, Math.round(s/60)) + ' min';
+  if(s < 86400) return 'hace ' + Math.round(s/3600) + ' h';
+  return 'el ' + new Date(ts).toLocaleDateString('es-ES', { day:'numeric', month:'short' });
+}
+function syncStatusLabel(){
+  switch(syncUiStatus){
+    case 'syncing': return 'Sincronizando…';
+    case 'pending': return 'Cambios pendientes de sincronizar…';
+    case 'ok': return 'Todo sincronizado' + (sync.lastSyncAt ? ' · ' + timeAgo(sync.lastSyncAt) : '');
+    case 'offline': return 'Sin conexión · se sincronizará al volver';
+    case 'error': return 'No se pudo sincronizar · reintentando';
+    default:
+      if(sync.dirty) return 'Cambios pendientes de sincronizar…';
+      return sync.lastSyncAt ? 'Todo sincronizado · ' + timeAgo(sync.lastSyncAt) : 'Aún sin sincronizar';
+  }
+}
+function renderSyncUI(){
+  const dot = document.getElementById('syncDot');
+  const text = document.getElementById('syncStatusText');
+  const btn = document.getElementById('syncNowBtn');
+  if(!dot || !text) return;
+  const effective = syncUiStatus !== 'idle' ? syncUiStatus : (sync.dirty ? 'pending' : (sync.lastSyncAt ? 'ok' : 'idle'));
+  dot.className = 'sync-dot' + (effective !== 'idle' ? ' ' + effective : '');
+  text.textContent = syncStatusLabel();
+  if(btn) btn.disabled = syncInFlight;
+  renderSyncDevices();
+}
+function renderSyncDevices(){
+  const wrap = document.getElementById('syncDevices');
+  if(!wrap) return;
+  const entries = remoteDevices ? Object.entries(remoteDevices) : [];
+  if(!entries.length){ wrap.style.display = 'none'; wrap.innerHTML = ''; return; }
+  entries.sort((a,b)=>(b[1].lastSyncAt || 0) - (a[1].lastSyncAt || 0));
+  const myId = getDeviceId();
+  wrap.style.display = 'block';
+  wrap.innerHTML = '<div class="sync-devices-label">Dispositivos</div>' + entries.map(([id, d])=>{
+    const current = (d.lastRev || 0) >= remoteRev;
+    return `<div class="sync-device">
+      <div>
+        <div class="dev-name">${esc(d.name || 'Dispositivo')}${id === myId ? ' · este dispositivo' : ''}</div>
+        <div class="dev-meta">Última sincronización ${timeAgo(d.lastSyncAt)}</div>
+      </div>
+      <span class="dev-state ${current ? 'current' : 'stale'}">${current ? 'Al día' : 'Desactualizado'}</span>
+    </div>`;
+  }).join('');
+}
+
 function renderAccountUI(){
   const loggedOut = document.getElementById('accountLoggedOut');
   const loggedIn = document.getElementById('accountLoggedIn');
@@ -1739,6 +2012,7 @@ function renderAccountUI(){
   loggedIn.style.display = authState.authenticated ? 'block' : 'none';
   if(authState.authenticated){
     document.getElementById('accountEmailLine').textContent = 'Sesión iniciada como ' + authState.email;
+    renderSyncUI();
   }
 }
 async function checkAuth(){
@@ -1750,44 +2024,31 @@ async function checkAuth(){
     authState = { authenticated:false, email:null };
   }
   renderAccountUI();
+  if(authState.authenticated) runSync('pull');
 }
-async function pullServerState(){
+// First sync after login/registration: instead of asking the user to pick a side,
+// combine both copies — per-habit stamps keep whichever version is newer.
+async function initialAccountSync(){
+  sync = { lastRev: 0, lastSyncAt: null, dirty: true };
+  saveSyncStore();
   try{
-    const res = await fetch('/api/sync');
-    if(!res.ok) return null;
-    const data = await res.json();
-    return data.state || null;
-  }catch(e){ return null; }
-}
-async function pushServerState(){
-  if(!authState.authenticated) return;
-  try{
-    await fetch('/api/sync', {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ state })
-    });
+    const remote = await fetchServerState();
+    if(remote && typeof remote.rev === 'number'){
+      remoteDevices = remote.devices || null;
+      remoteRev = remote.rev;
+      const hasLocal = state.habits.length > 0;
+      const hasServer = remote.state && Array.isArray(remote.state.habits) && remote.state.habits.length > 0;
+      if(hasServer && hasLocal){
+        adoptState(mergeStates(state, remote.state));
+        showToast('Datos de tus dispositivos combinados');
+      } else if(hasServer){
+        adoptState(remote.state);
+      }
+      sync.lastRev = remote.rev;
+      saveSyncStore();
+    }
   }catch(e){}
-}
-async function resolveSyncConflict(){
-  const server = await pullServerState();
-  const hasLocal = state.habits && state.habits.length > 0;
-  const hasServer = server && Array.isArray(server.habits) && server.habits.length > 0;
-  if(hasServer && hasLocal){
-    const useServer = confirm(
-      'Ya hay hábitos guardados en esta cuenta desde otro dispositivo.\n\n' +
-      'Aceptar: usar esos datos (reemplaza lo de este teléfono).\n' +
-      'Cancelar: mantener lo de este teléfono (reemplaza lo de la cuenta).'
-    );
-    if(useServer){ state = server; localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
-    else { await pushServerState(); }
-  } else if(hasServer){
-    state = server; localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  } else {
-    await pushServerState();
-  }
-  migrateUnits();
-  reconcileAll();
-  refreshCurrentView();
+  await runSync('push');
 }
 async function authAction(kind){
   const email = document.getElementById('acc_email').value.trim();
@@ -1804,20 +2065,23 @@ async function authAction(kind){
     document.getElementById('acc_password').value = '';
     renderAccountUI();
     showToast(kind==='register' ? 'Cuenta creada' : 'Sesión iniciada');
-    await resolveSyncConflict();
+    await initialAccountSync();
   }catch(e){ showToast('Error de red, intenta de nuevo'); }
 }
 async function logoutAccount(){
   try{ await fetch('/api/auth/logout', { method:'POST' }); }catch(e){}
   authState = { authenticated:false, email:null };
+  clearTimeout(syncRetryTimer);
+  clearTimeout(syncDebounceTimer);
+  sync = { lastRev: 0, lastSyncAt: null, dirty: false };
+  saveSyncStore();
+  remoteDevices = null;
+  remoteRev = 0;
+  syncUiStatus = 'idle';
   renderAccountUI();
   showToast('Sesión cerrada');
 }
-async function syncNow(){
-  if(!authState.authenticated){ showToast('Inicia sesión primero'); return; }
-  await pushServerState();
-  showToast('Sincronizado');
-}
+window.addEventListener('online', ()=>{ if(authState.authenticated) runSync('retry'); });
 function exportData(){
   const blob = new Blob([JSON.stringify(state,null,2)], {type:'application/json'});
   const url = URL.createObjectURL(blob);
@@ -2160,6 +2424,8 @@ document.addEventListener('visibilitychange', ()=>{
   if(!document.hidden){
     drainFiredReminders();
     reconcileAll(); refreshCurrentView(); syncPush();
+    if(authState.authenticated) runSync('pull'); // pick up what other devices saved
+
     // Wake locks are released by the OS when the tab is hidden; re-acquire if a timer is still running.
     if(state.habits.some(h=>h.timerStart)) requestWakeLock();
   }
