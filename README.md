@@ -60,8 +60,10 @@ Por eso el envío es real Web Push con un componente de servidor mínimo:
 En **Ajustes → Cuenta y sincronización** se puede crear una cuenta (correo + contraseña) para llevar los hábitos a otro dispositivo. Es opcional y local-first:
 
 - Sin cuenta, nada cambia respecto a antes: todo vive solo en `localStorage`.
-- Al crear cuenta o iniciar sesión, si ya había datos en el servidor de un dispositivo anterior, la app pregunta si quieres usar esos datos o subir los de este teléfono (sin fusionar automáticamente — evita perder historial por accidente).
-- Mientras haya sesión iniciada, cada cambio se sincroniza al servidor solo (con un pequeño *debounce*), además del botón manual **Sincronizar ahora**.
+- Al crear cuenta o iniciar sesión, si ya había datos en el servidor de otro dispositivo, ambas copias se **combinan automáticamente**: cada hábito lleva un sello `updatedAt` y gana la versión más reciente por hábito; los borrados dejan una lápida (*tombstone*) para que eliminar en un dispositivo no "resucite" el hábito desde otro.
+- Mientras haya sesión iniciada, cada cambio se guarda en la cuenta solo (con un pequeño *debounce*), además del botón manual **Sincronizar ahora**. La tarjeta de Ajustes muestra el progreso y estado de la sincronización (pendiente / sincronizando / al día / sin conexión) y reintenta con *backoff* si falla la red.
+- El servidor lleva un contador de revisión por cuenta (concurrencia optimista): si un dispositivo intenta escribir partiendo de una revisión vieja recibe `409` con la copia del servidor, fusiona localmente y reintenta — el último en escribir ya no pisa a ciegas lo del otro.
+- También se registra **qué tiene cada dispositivo**: nombre, última sincronización y última revisión integrada. Ajustes lista los dispositivos y marca cuál está "Al día" y cuál "Desactualizado".
 - Autenticación: contraseñas con `scrypt` + salt (nunca en texto plano), sesión por cookie `httpOnly`/`Secure` con token opaco guardado en Redis (no JWT, así cerrar sesión invalida el token de inmediato). No incluye verificación de correo ni "olvidé mi contraseña" — es un MVP; si se necesita, es un siguiente paso.
 - Los datos sincronizados son el mismo JSON que ya vive en el teléfono (hábitos, registros, notas incluidas). Sin cuenta, nada de eso sale del dispositivo.
 
