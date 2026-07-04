@@ -149,6 +149,15 @@
   .note-block{margin:0 16px 14px;}
   .note-text{ font-size:15px; line-height:1.55; color:var(--ink-700); background:var(--input-bg); border:1px solid var(--rule); border-radius:12px; padding:11px 13px; word-break:break-word; white-space:pre-wrap; }
   .note-text a{ color:var(--hc,var(--amber)); text-decoration:underline; }
+  .note-text ul, .diary-note ul{ margin:6px 0; padding-left:20px; }
+  .note-text li, .diary-note li{ margin:2px 0; }
+  .note-toolbar{ display:flex; align-items:center; gap:6px; margin-top:8px; }
+  .note-toolbar button{ min-width:40px; min-height:36px; padding:6px 10px; border-radius:9px; border:1px solid var(--rule); background:var(--input-bg); color:var(--ink-700); font-size:14px; font-weight:700; cursor:pointer; }
+  .note-toolbar button:active{ transform:scale(.95); opacity:.8; }
+  .note-wordcount{ margin-left:auto; font-size:12.5px; color:var(--ink-500); font-variant-numeric:tabular-nums; }
+  .focus-overlay .note-toolbar{ width:100%; max-width:360px; }
+  .focus-overlay .note-toolbar button{ background:rgba(255,255,255,.1); border-color:rgba(255,255,255,.2); color:var(--bar-text); }
+  .focus-overlay .note-wordcount{ color:var(--bar-text-dim); }
 
   .empty-state{ text-align:center; padding:56px 20px; color:var(--ink-500); }
   .empty-state .display{ font-size:21px; color:var(--ink-900); margin-bottom:8px; }
@@ -401,6 +410,7 @@
       <div class="top-actions" id="topActions">
         <button class="lt-btn" data-layout="stack" onclick="setHoyLayout('stack')" aria-label="Vista en lista"><svg viewBox="0 0 24 24"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg></button>
         <button class="lt-btn" data-layout="grid" onclick="setHoyLayout('grid')" aria-label="Vista en cuadrícula"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg></button>
+        <button class="lt-btn" id="notesToggleBtn" onclick="toggleHoyNotes()" aria-label="Mostrar u ocultar notas"><svg viewBox="0 0 24 24"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/></svg></button>
       </div>
     </div>
   </header>
@@ -562,7 +572,14 @@
     <div class="grabber"></div>
     <h2>Nota</h2>
     <div class="field">
-      <textarea id="f_dayNote" placeholder="Escribe una nota — puedes incluir enlaces, se vuelven clicables"></textarea>
+      <textarea id="f_dayNote" placeholder="Escribe una nota — enlaces clicables, **negrita**, *cursiva*, ~~tachado~~ y listas con -" oninput="updateNoteCounter('f_dayNote')"></textarea>
+      <div class="note-toolbar">
+        <button type="button" onclick="applyNoteFormat('f_dayNote','bold')" aria-label="Negrita"><b>N</b></button>
+        <button type="button" onclick="applyNoteFormat('f_dayNote','italic')" aria-label="Cursiva"><i>K</i></button>
+        <button type="button" onclick="applyNoteFormat('f_dayNote','strike')" aria-label="Tachado"><s>S</s></button>
+        <button type="button" onclick="applyNoteFormat('f_dayNote','bullet')" aria-label="Lista con viñetas">•—</button>
+        <span class="note-wordcount" id="wc_f_dayNote">0 palabras</span>
+      </div>
     </div>
     <div class="modal-actions">
       <div class="btn" onclick="closeNoteModal()">Cancelar</div>
@@ -579,7 +596,14 @@
   <div class="focus-name" id="focusName"></div>
   <div class="focus-timer" id="focusTimerDisplay">00:00</div>
   <div class="focus-meta" id="focusMeta"></div>
-  <textarea class="focus-note" id="focusNote" placeholder="¿Cómo va esta sesión? (opcional)"></textarea>
+  <textarea class="focus-note" id="focusNote" placeholder="¿Cómo va esta sesión? (opcional)" oninput="updateNoteCounter('focusNote')"></textarea>
+  <div class="note-toolbar">
+    <button type="button" onclick="applyNoteFormat('focusNote','bold')" aria-label="Negrita"><b>N</b></button>
+    <button type="button" onclick="applyNoteFormat('focusNote','italic')" aria-label="Cursiva"><i>K</i></button>
+    <button type="button" onclick="applyNoteFormat('focusNote','strike')" aria-label="Tachado"><s>S</s></button>
+    <button type="button" onclick="applyNoteFormat('focusNote','bullet')" aria-label="Lista con viñetas">•—</button>
+    <span class="note-wordcount" id="wc_focusNote">0 palabras</span>
+  </div>
   <button class="focus-stop" onclick="stopTimerFromFocus()">Finalizar sesión</button>
 </div>
 
@@ -808,7 +832,17 @@ function setHoyLayout(mode){
 }
 function updateHoyLayoutButtons(){
   const layout = getHoyLayout();
-  document.querySelectorAll('.lt-btn').forEach(b=>b.classList.toggle('active', b.dataset.layout===layout));
+  document.querySelectorAll('.lt-btn[data-layout]').forEach(b=>b.classList.toggle('active', b.dataset.layout===layout));
+  const notesBtn = document.getElementById('notesToggleBtn');
+  if(notesBtn) notesBtn.classList.toggle('active', notesVisibleHoy());
+}
+function notesVisibleHoy(){ return !(state.settings && state.settings.hideNotesHoy); }
+function toggleHoyNotes(){
+  state.settings = state.settings || {};
+  state.settings.hideNotesHoy = !state.settings.hideNotesHoy;
+  saveState();
+  renderHoy();
+  showToast(notesVisibleHoy() ? 'Notas visibles' : 'Notas ocultas');
 }
 
 /* Inline SVG icons for the habit cards and the summary */
@@ -958,7 +992,7 @@ function renderHabitCardHtml(h, t){
       <button onclick="confirmBump('${h.id}')" style="background:${color}">Subir a ${nextVal}</button>
     </div>` : ''}
 
-    ${log.dayNote ? `<div class="note-block"><div class="note-text">${linkify(log.dayNote)}</div></div>` : ''}
+    ${log.dayNote && notesVisibleHoy() ? `<div class="note-block"><div class="note-text">${formatNote(log.dayNote)}</div></div>` : ''}
 
     ${showFoot ? `
     <div class="hc-foot">
@@ -1024,6 +1058,7 @@ function setLogValue(id, value){
   const v = parseFloat(value)||0;
   h.logs[t].value = v;
   h.logs[t].done = v > 0;
+  h.logs[t].vAt = Date.now(); // per-day stamp so sync merges keep the latest value
   saveState();
   const earned = checkBadges(h);
   saveState();
@@ -1036,6 +1071,7 @@ function toggleDone(id){
   const t = todayStr();
   if(!h.logs[t]) h.logs[t] = { done:false, value:0 };
   h.logs[t].done = !h.logs[t].done;
+  h.logs[t].vAt = Date.now();
   saveState();
   const earned = checkBadges(h);
   saveState();
@@ -1094,6 +1130,7 @@ function stopTimer(id, note){
   log.sessions.push({ value: sessionValue, seconds: elapsedSec, note: (note||'').trim(), endedAt: Date.now() });
   log.value = round1(log.sessions.reduce((s,x)=>s+x.value, 0));
   log.elapsedSeconds = (log.elapsedSeconds||0) + elapsedSec;
+  log.vAt = Date.now();
   const rating = computeRating(log.value, h.currentTarget);
   if(log.value>0) log.done = true;
   saveState();
@@ -1129,6 +1166,7 @@ function openFocus(id){
   document.getElementById('focusIcon').textContent = h.icon;
   document.getElementById('focusName').textContent = h.name;
   document.getElementById('focusNote').value = '';
+  updateNoteCounter('focusNote');
   updateFocusMeta();
   updateFocusTimerDisplay();
   overlay.classList.add('show');
@@ -1314,7 +1352,7 @@ function renderDetail(){
     <div class="diary-list">${diary.map(e=>`
       <div class="diary-entry">
         <div class="diary-date">${formatDiaryDate(e.date)} · ${e.value} ${esc(h.unit)}</div>
-        <div class="diary-note">${linkify(e.note)}</div>
+        <div class="diary-note">${formatNote(e.note)}</div>
       </div>`).join('')}</div>
     ` : ''}
 
@@ -1542,12 +1580,49 @@ function openHabitForm(id){
 function closeHabitForm(){ document.getElementById('habitModalOverlay').classList.remove('show'); }
 
 /* ---------------- Day notes (added after registering a habit for the day) ---------------- */
+function noteWordCount(text){
+  const words = (text || '').trim().match(/\S+/g);
+  return words ? words.length : 0;
+}
+function updateNoteCounter(id){
+  const ta = document.getElementById(id);
+  const el = document.getElementById('wc_' + id);
+  if(!ta || !el) return;
+  const n = noteWordCount(ta.value);
+  el.textContent = n + (n === 1 ? ' palabra' : ' palabras');
+}
+// Toolbar: wraps the selection in markdown markers (or toggles "- " per line
+// for bullets); the note renders formatted wherever notes are shown.
+function applyNoteFormat(id, kind){
+  const ta = document.getElementById(id);
+  if(!ta) return;
+  const v = ta.value, s = ta.selectionStart, e = ta.selectionEnd;
+  if(kind === 'bullet'){
+    const lineStart = v.lastIndexOf('\n', s - 1) + 1;
+    const block = v.slice(lineStart, e);
+    const allBulleted = block.split('\n').every(l=>/^\s*-\s/.test(l) || !l.trim());
+    const lines = block.split('\n').map(l=>{
+      if(!l.trim()) return l;
+      return allBulleted ? l.replace(/^(\s*)-\s+/, '$1') : (/^\s*-\s/.test(l) ? l : '- ' + l);
+    });
+    ta.value = v.slice(0, lineStart) + lines.join('\n') + v.slice(e);
+    ta.setSelectionRange(lineStart, lineStart + lines.join('\n').length);
+  } else {
+    const wrap = kind === 'bold' ? '**' : kind === 'strike' ? '~~' : '*';
+    const sel = v.slice(s, e) || 'texto';
+    ta.value = v.slice(0, s) + wrap + sel + wrap + v.slice(e);
+    ta.setSelectionRange(s + wrap.length, s + wrap.length + sel.length);
+  }
+  ta.focus();
+  updateNoteCounter(id);
+}
 let noteHabitId = null;
 function openNoteModal(habitId){
   noteHabitId = habitId;
   const h = state.habits.find(x=>x.id===habitId);
   const log = h.logs[todayStr()] || {};
   document.getElementById('f_dayNote').value = log.dayNote || '';
+  updateNoteCounter('f_dayNote');
   document.getElementById('noteModalOverlay').classList.add('show');
 }
 function closeNoteModal(){
@@ -1811,8 +1886,54 @@ function getDeviceName(){
   return os + (installed ? ' · App' : ' · Navegador');
 }
 
-// Habit-level merge: for each id present on either side the copy with the newer
-// updatedAt stamp wins; a tombstone newer than the habit's last edit removes it.
+// Field-level merge of one day's log from two devices. Each concern carries its
+// own stamp so edits made on different devices both survive: dayNote/dayNoteAt
+// (notes — saving an empty note also stamps, so deletions propagate), vAt
+// (manual value / done toggles), and sessions are unioned by identity.
+function mergeLog(a, b){
+  const valueSrc = (a.vAt || 0) >= (b.vAt || 0) ? a : b;
+  const merged = Object.assign({}, a, b, valueSrc);
+  const aN = a.dayNoteAt || 0, bN = b.dayNoteAt || 0;
+  const noteSrc = aN > bN ? a : bN > aN ? b : (a.dayNote ? a : b);
+  merged.dayNote = noteSrc.dayNote;
+  merged.dayNoteAt = noteSrc.dayNoteAt;
+  const seen = new Set();
+  merged.sessions = [...(a.sessions || []), ...(b.sessions || [])].filter(s=>{
+    const k = [s.endedAt || 0, s.seconds || 0, s.value || 0, s.note || ''].join('|');
+    if(seen.has(k)) return false;
+    seen.add(k);
+    return true;
+  }).sort((x,y)=>(x.endedAt || 0) - (y.endedAt || 0));
+  // Timer sessions logged on both devices the same day are additive: if the
+  // union brought in sessions the winning side didn't know about (and they're
+  // all real timed sessions, not migration backfill), the total is their sum.
+  if(merged.sessions.length > (valueSrc.sessions || []).length && merged.sessions.every(s=>s.endedAt)){
+    merged.value = round1(merged.sessions.reduce((s,x)=>s+(x.value||0), 0));
+    merged.elapsedSeconds = merged.sessions.reduce((s,x)=>s+(x.seconds||0), 0);
+    if(merged.value > 0) merged.done = true;
+  }
+  return merged;
+}
+// Merge two copies of the same habit: the newer copy wins scalar fields (name,
+// target, reminders…), but logs merge day by day so a note written on one
+// device is never wiped out by a value registered on another.
+function mergeHabit(a, b){
+  const newer = (a.updatedAt || 0) >= (b.updatedAt || 0) ? a : b;
+  const older = newer === a ? b : a;
+  const merged = { ...newer };
+  const logs = {};
+  new Set([...Object.keys(newer.logs || {}), ...Object.keys(older.logs || {})]).forEach(d=>{
+    const ln = (newer.logs || {})[d], lo = (older.logs || {})[d];
+    logs[d] = (ln && lo) ? mergeLog(ln, lo) : (ln || lo);
+  });
+  merged.logs = logs;
+  merged.bestStreak = Math.max(a.bestStreak || 0, b.bestStreak || 0);
+  merged.badges = [...new Set([...(a.badges || []), ...(b.badges || [])])];
+  merged.updatedAt = Math.max(a.updatedAt || 0, b.updatedAt || 0);
+  return merged;
+}
+// Merge two whole states; a tombstone newer than a habit's last edit removes it.
+// Top-level extras (settings, etc.) are preserved, preferring this device's.
 function mergeStates(local, remote){
   const deleted = {};
   [remote.deleted || {}, local.deleted || {}].forEach(src=>{
@@ -1825,10 +1946,10 @@ function mergeStates(local, remote){
   (remote.habits || []).forEach(h=>byId.set(h.id, h));
   (local.habits || []).forEach(h=>{
     const other = byId.get(h.id);
-    if(!other || (h.updatedAt || 0) >= (other.updatedAt || 0)) byId.set(h.id, h);
+    byId.set(h.id, other ? mergeHabit(h, other) : h);
   });
   const habits = [...byId.values()].filter(h=>!(deleted[h.id] && deleted[h.id] >= (h.updatedAt || 0)));
-  return { habits, deleted };
+  return { ...remote, ...local, habits, deleted };
 }
 
 // Swap in a state that came from (or was merged with) the server. saveState runs
@@ -2082,6 +2203,26 @@ async function logoutAccount(){
   showToast('Sesión cerrada');
 }
 window.addEventListener('online', ()=>{ if(authState.authenticated) runSync('retry'); });
+// Flush pending changes when the app is closed or backgrounded: keepalive lets
+// the request outlive the page. A 409 here is ignored on purpose — the next
+// open pulls and merges, which is safer than blocking the tab from closing.
+function flushSyncOnExit(){
+  if(!authState.authenticated || !sync.dirty || syncInFlight) return;
+  clearTimeout(syncDebounceTimer);
+  try{
+    fetch('/api/sync', {
+      method:'POST', keepalive:true, headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ state, baseRev: sync.lastRev, deviceId: getDeviceId(), deviceName: getDeviceName() })
+    }).then(res=>res.ok ? res.json() : null).then(data=>{
+      if(data && typeof data.rev === 'number'){
+        sync.lastRev = data.rev; sync.dirty = false; sync.lastSyncAt = Date.now();
+        saveSyncStore();
+        setSyncStatus('ok');
+      }
+    }).catch(()=>{});
+  }catch(e){}
+}
+window.addEventListener('pagehide', flushSyncOnExit);
 function exportData(){
   const blob = new Blob([JSON.stringify(state,null,2)], {type:'application/json'});
   const url = URL.createObjectURL(blob);
@@ -2421,6 +2562,7 @@ function prefillHabitSuggestion(icon, name, unitId){
    The page just keeps the server's copy of each habit's reminder time in
    sync (syncPush). */
 document.addEventListener('visibilitychange', ()=>{
+  if(document.hidden){ flushSyncOnExit(); return; } // push pending edits before iOS suspends us
   if(!document.hidden){
     drainFiredReminders();
     reconcileAll(); refreshCurrentView(); syncPush();
@@ -2444,6 +2586,39 @@ function linkify(s){
     const href = /^https?:\/\//i.test(match) ? match : 'https://' + match;
     return `<a href="${href}" target="_blank" rel="noopener noreferrer">${match}</a>${trail}`;
   });
+}
+// Note renderer: linkify plus a markdown-lite subset — **bold**, *cursiva* or
+// _cursiva_, ~~tachado~~, and "- " bullet lines. URLs are pulled out into
+// placeholders before the inline transforms run so a URL containing _ or *
+// never gets chopped into italics, then restored at the end. Input is escaped
+// by linkify/esc first, so user text never becomes raw HTML.
+function formatNote(s){
+  const links = [];
+  let text = linkify(s).replace(/<a [^>]*>.*?<\/a>/g, m => {
+    links.push(m);
+    return '\x00' + (links.length - 1) + '\x00';
+  });
+  text = text
+    .replace(/\*\*([^*\n]+)\*\*/g, '<b>$1</b>')
+    .replace(/~~([^~\n]+)~~/g, '<s>$1</s>')
+    .replace(/(^|[\s(])\*([^*\n]+)\*(?=[\s).,;:!?]|$)/g, '$1<i>$2</i>')
+    .replace(/(^|[\s(])_([^_\n]+)_(?=[\s).,;:!?]|$)/g, '$1<i>$2</i>');
+  // group consecutive "- " / "• " lines into a list; everything else joins with <br>
+  const out = [];
+  let bullets = null;
+  text.split('\n').forEach(line=>{
+    const m = line.match(/^\s*(?:-|•|\*)\s+(.*)$/);
+    if(m){ (bullets = bullets || []).push('<li>' + m[1] + '</li>'); return; }
+    if(bullets){ out.push('<ul>' + bullets.join('') + '</ul>'); bullets = null; }
+    out.push(line);
+  });
+  if(bullets) out.push('<ul>' + bullets.join('') + '</ul>');
+  let html = out.map((chunk, i)=>{
+    if(chunk.startsWith('<ul>')) return chunk;
+    const next = out[i+1];
+    return chunk + (i < out.length - 1 && !(next && next.startsWith('<ul>')) ? '<br>' : '');
+  }).join('');
+  return html.replace(/\x00(\d+)\x00/g, (_, i) => links[i]);
 }
 function showToast(msg){
   const el = document.getElementById('toast');
