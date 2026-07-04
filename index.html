@@ -836,11 +836,13 @@ function updateHoyLayoutButtons(){
   const notesBtn = document.getElementById('notesToggleBtn');
   if(notesBtn) notesBtn.classList.toggle('active', notesVisibleHoy());
 }
-function notesVisibleHoy(){ return !(state.settings && state.settings.hideNotesHoy); }
+// Hide-notes is a per-device view preference, so it lives in localStorage —
+// NOT in state.settings, which syncs: there it leaked the toggle to every
+// other device and a pull could flip it back on its own.
+const HIDE_NOTES_KEY = 'escalon_hide_notes_hoy';
+function notesVisibleHoy(){ return localStorage.getItem(HIDE_NOTES_KEY) !== '1'; }
 function toggleHoyNotes(){
-  state.settings = state.settings || {};
-  state.settings.hideNotesHoy = !state.settings.hideNotesHoy;
-  saveState();
+  localStorage.setItem(HIDE_NOTES_KEY, notesVisibleHoy() ? '1' : '0');
   renderHoy();
   showToast(notesVisibleHoy() ? 'Notas visibles' : 'Notas ocultas');
 }
@@ -2644,6 +2646,16 @@ function setDateLine(){
 window.addEventListener('scroll', ()=>{
   document.querySelector('header.top').classList.toggle('glassed', window.scrollY > 24);
 }, {passive:true});
+// One-time cleanup: the hide-notes toggle briefly shipped inside synced
+// state.settings; move any stored value to this device and drop it from the
+// synced blob so it stops propagating between devices.
+if(state.settings && 'hideNotesHoy' in state.settings){
+  if(localStorage.getItem(HIDE_NOTES_KEY) === null && state.settings.hideNotesHoy){
+    localStorage.setItem(HIDE_NOTES_KEY, '1');
+  }
+  delete state.settings.hideNotesHoy;
+  saveState();
+}
 setDateLine();
 reconcileAll();
 renderHoy();
